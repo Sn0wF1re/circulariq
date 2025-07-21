@@ -1,0 +1,99 @@
+<template>
+  <div>
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h2 class="text-2xl font-bold">Footprint Reports</h2>
+        <p class="text-gray-600">Generate and manage sustainability reports</p>
+      </div>
+      <button class="bg-[#28A745] hover:bg-[#14532D] text-white px-4 py-2 rounded-lg flex items-center gap-2">
+        <Download class="w-4 h-4 mr-2" />
+        Generate Report
+      </button>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <Card class="lg:col-span-2">
+        <CardHeader>
+          <CardTitle>Quarterly Reports</CardTitle>
+          <CardDescription>Plastic footprint and emissions data</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <table class="w-full text-left">
+            <thead>
+              <tr>
+                <th class="font-semibold text-gray-700">Product</th>
+                <th class="font-semibold text-gray-700">Period</th>
+                <th class="font-semibold text-gray-700">Plastic (kg)</th>
+                <th class="font-semibold text-gray-700">CO2e</th>
+                <th class="font-semibold text-gray-700">Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="report in reports" :key="report.id" class="hover:bg-gray-50 border-b border-gray-200 last:border-b-0">
+                <td class="px-4 py-3">{{ getProductName(report.product_id) }}</td>
+                <td class="px-4 py-3">{{ report.reporting_period }}</td>
+                <td class="px-4 py-3">{{ report.total_plastic_kg }}</td>
+                <td class="px-4 py-3">{{ report.emissions_co2e }}</td>
+                <td class="px-4 py-3">{{ report.footprint_score }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Report Templates</CardTitle>
+          <CardDescription>Pre-configured report formats</CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-3">
+          <button class="border px-4 py-2 rounded-lg w-full flex items-center gap-2">
+            <FileText class="w-4 h-4 mr-2" /> EU Compliance Report
+          </button>
+          <button class="border px-4 py-2 rounded-lg w-full flex items-center gap-2">
+            <FileText class="w-4 h-4 mr-2" /> Carbon Footprint Summary
+          </button>
+          <button class="border px-4 py-2 rounded-lg w-full flex items-center gap-2">
+            <FileText class="w-4 h-4 mr-2" /> Recyclability Assessment
+          </button>
+          <button class="border px-4 py-2 rounded-lg w-full flex items-center gap-2">
+            <FileText class="w-4 h-4 mr-2" /> Custom Report Builder
+          </button>
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from 'shadcn-vue'
+import { Download, FileText } from 'lucide-vue-next'
+
+const products = ref([
+  { id: '1', name: 'Eco Water Bottle' },
+  { id: '2', name: 'Biodegradable Food Container' }
+])
+
+const reports = ref([
+  {
+    id: '1',
+    product_id: '1',
+    reporting_period: '2024-Q1',
+    total_plastic_kg: 1250,
+    emissions_co2e: 3.2,
+    footprint_score: 78
+  },
+  {
+    id: '2',
+    product_id: '2',
+    reporting_period: '2024-Q2',
+    total_plastic_kg: 890,
+    emissions_co2e: 2.1,
+    footprint_score: 82
+  }
+])
+
+function getProductName(productId) {
+  const product = products.value.find(p => p.id === productId)
+  return product ? product.name : 'Unknown'
+}
+</script>
