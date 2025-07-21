@@ -113,38 +113,24 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { CheckCircle, AlertTriangle, XCircle, Loader2 } from 'lucide-vue-next'
+import { useRecommendations } from '@/composables/useRecommendations'
 
-const products = ref([
-  { id: '1', name: 'Eco Water Bottle' },
-  { id: '2', name: 'Biodegradable Food Container' }
-])
+const {
+  recommendations,
+  implementedIds,
+  loading,
+  fetchRecommendations,
+  markAsImplemented: markAsImplementedSupabase
+} = useRecommendations()
 
-const recommendations = ref([
-  {
-    id: '1',
-    product_id: '1',
-    title: 'Increase Recycled Content',
-    details: 'Consider increasing recycled PET content from 75% to 85% to improve sustainability score',
-    ai_confidence: 0.92,
-    estimated_cost: 2500,
-    difficulty: 'Medium'
-  },
-  {
-    id: '2',
-    product_id: '2',
-    title: 'Alternative Material Research',
-    details: 'Explore bio-based alternatives with higher recyclability rates',
-    ai_confidence: 0.78,
-    estimated_cost: 15000,
-    difficulty: 'Hard'
-  }
-])
+onMounted(() => {
+  fetchRecommendations()
+})
 
 const selectedProduct = ref('all')
 const statusFilter = ref('all')
-const implementedIds = ref([])
 const loadingIds = ref([])
 
 const filteredRecommendations = computed(() => {
@@ -195,10 +181,9 @@ function getDifficultyDescription(difficulty) {
 function markAsImplemented(id) {
   if (!implementedIds.value.includes(id)) {
     loadingIds.value.push(id)
-    setTimeout(() => {
-      implementedIds.value.push(id)
+    markAsImplementedSupabase(id).finally(() => {
       loadingIds.value = loadingIds.value.filter(lid => lid !== id)
-    }, 800) // Simulate async
+    })
   }
 }
 
