@@ -20,11 +20,14 @@
       </Select>
     </div>
     <div class="space-y-4">
-      <Card v-for="rec in filteredRecommendations" :key="rec.id">
+      <Card v-for="rec in filteredRecommendations" :key="rec.id" :class="implementedIds.includes(rec.id) ? 'opacity-60' : ''">
         <CardHeader>
           <div class="flex items-start justify-between">
             <div>
-              <div class="font-semibold text-lg">{{ rec.title }}</div>
+              <div class="font-semibold text-lg flex items-center gap-2">
+                {{ rec.title }}
+                <CheckCircle v-if="implementedIds.includes(rec.id)" class="w-4 h-4 text-green-500" />
+              </div>
               <div class="text-sm text-gray-500">{{ getProductName(rec.product_id) }}</div>
             </div>
             <span class="flex items-center gap-1">
@@ -50,6 +53,11 @@
               :style="{ width: Math.round(rec.ai_confidence * 100) + '%' }"
             />
           </div>
+          <button
+            v-if="!implementedIds.includes(rec.id)"
+            @click="markAsImplemented(rec.id)"
+            class="mt-4 px-3 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700"
+          >Mark as Implemented</button>
           <Dialog>
             <DialogTrigger as-child>
               <button class="mt-4 px-3 py-1 bg-primary text-white rounded text-xs font-semibold hover:bg-primary/90">View Details</button>
@@ -111,6 +119,7 @@ const recommendations = ref([
 ])
 
 const selectedProduct = ref('all')
+const implementedIds = ref([])
 
 const filteredRecommendations = computed(() => {
   if (selectedProduct.value === 'all') return recommendations.value
@@ -140,6 +149,12 @@ function getDifficultyIconColor(difficulty) {
   if (difficulty === 'Medium') return 'text-yellow-500'
   if (difficulty === 'Hard') return 'text-red-500'
   return 'text-gray-400'
+}
+
+function markAsImplemented(id) {
+  if (!implementedIds.value.includes(id)) {
+    implementedIds.value.push(id)
+  }
 }
 
 function downloadRecommendation(rec) {
