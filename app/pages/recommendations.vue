@@ -1,121 +1,120 @@
 <template>
-  <div>
-    <div class="mb-6">
-      <h2 class="text-2xl font-bold">AI-Powered Recommendations</h2>
-      <p class="text-gray-600">Intelligent suggestions to improve your sustainability profile</p>
-    </div>
-    <div class="mb-4 w-full max-w-xs flex gap-4">
-      <Select v-model="selectedProduct">
-        <SelectTrigger>
-          <SelectValue placeholder="Filter by product" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Products</SelectItem>
-          <SelectSeparator />
-          <SelectGroup>
-            <SelectLabel>Products</SelectLabel>
-            <SelectItem v-for="prod in products" :key="prod.id" :value="prod.id">{{ prod.name }}</SelectItem>
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-      <Select v-model="statusFilter" class="min-w-[120px]">
-        <SelectTrigger>
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All</SelectItem>
-          <SelectItem value="unimplemented">Unimplemented</SelectItem>
-          <SelectItem value="implemented">Implemented</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-    <div class="space-y-4">
-      <Card v-for="rec in filteredRecommendations" :key="rec.id" :class="implementedIds.includes(rec.id) ? 'opacity-60' : ''">
-        <CardHeader>
-          <div class="flex items-start justify-between">
-            <div>
-              <div class="font-semibold text-lg flex items-center gap-2">
-                {{ rec.title }}
-                <CheckCircle v-if="implementedIds.includes(rec.id)" class="w-4 h-4 text-green-500" />
+  <TooltipProvider>
+    <div>
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold">AI-Powered Recommendations</h2>
+        <p class="text-gray-600">Intelligent suggestions to improve your sustainability profile</p>
+      </div>
+      <div class="mb-4 w-full max-w-xs flex gap-4">
+        <Select v-model="selectedProduct">
+          <SelectTrigger>
+            <SelectValue placeholder="Filter by product" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Products</SelectItem>
+            <SelectSeparator />
+            <SelectGroup>
+              <SelectLabel>Products</SelectLabel>
+              <SelectItem v-for="prod in products" :key="prod.id" :value="prod.id">{{ prod.name }}</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+        <Select v-model="statusFilter" class="min-w-[120px]">
+          <SelectTrigger>
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="unimplemented">Unimplemented</SelectItem>
+            <SelectItem value="implemented">Implemented</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div class="space-y-4">
+        <Card v-for="rec in filteredRecommendations" :key="rec.id" :class="implementedIds.includes(rec.id) ? 'opacity-60' : ''">
+          <CardHeader>
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="font-semibold text-lg flex items-center gap-2">
+                  {{ rec.title }}
+                  <CheckCircle v-if="implementedIds.includes(rec.id)" class="w-4 h-4 text-green-500" />
+                </div>
+                <div class="text-sm text-gray-500">{{ getProductName(rec.product_id) }}</div>
               </div>
-              <div class="text-sm text-gray-500">{{ getProductName(rec.product_id) }}</div>
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <span class="flex items-center gap-1">
+                    <component :is="getDifficultyIcon(rec.difficulty)" :class="getDifficultyIconColor(rec.difficulty)" class="w-4 h-4" />
+                    <span :class="getDifficultyColor(rec.difficulty)" class="px-2 py-1 rounded-full text-xs font-semibold">{{ rec.difficulty }}</span>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {{ getDifficultyDescription(rec.difficulty) }}
+                </TooltipContent>
+              </Tooltip>
             </div>
-            <Tooltip>
-              <TooltipTrigger as-child>
-                <span class="flex items-center gap-1">
-                  <component :is="getDifficultyIcon(rec.difficulty)" :class="getDifficultyIconColor(rec.difficulty)" class="w-4 h-4" />
-                  <span :class="getDifficultyColor(rec.difficulty)" class="px-2 py-1 rounded-full text-xs font-semibold">{{ rec.difficulty }}</span>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>
-                {{ getDifficultyDescription(rec.difficulty) }}
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p class="text-gray-700 mb-4">{{ rec.details }}</p>
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs text-gray-500">AI Confidence: <span class="font-bold">{{ Math.round(rec.ai_confidence * 100) }}%</span></span>
-            <span class="text-xs text-gray-500">Estimated Cost: <span class="font-bold">${{ rec.estimated_cost.toLocaleString() }}</span></span>
-          </div>
-          <div class="h-2 bg-gray-100 rounded overflow-hidden">
-            <div
-              class="progress-bar h-full transition-all"
-              :class="[
-                rec.ai_confidence >= 0.8 ? 'bg-green-500' :
-                rec.ai_confidence >= 0.5 ? 'bg-yellow-500' :
-                'bg-red-500'
-              ]"
-              :style="{ width: Math.round(rec.ai_confidence * 100) + '%' }"
-            />
-          </div>
-          <div class="flex gap-2 mt-4">
-            <button
-              v-if="!implementedIds.includes(rec.id)"
-              @click="markAsImplemented(rec.id)"
-              :disabled="loadingIds.includes(rec.id)"
-              class="px-3 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700 flex items-center gap-2"
-            >
-              <Loader2 v-if="loadingIds.includes(rec.id)" class="animate-spin w-4 h-4" />
-              <span>Mark as Implemented</span>
-            </button>
-            <Dialog>
-              <DialogTrigger as-child>
-                <button class="px-3 py-1 bg-primary text-white rounded text-xs font-semibold hover:bg-primary/90">View Details</button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{{ rec.title }}</DialogTitle>
-                  <DialogDescription>
-                    <div class="mb-2 text-sm text-gray-500">Product: <span class="font-bold">{{ getProductName(rec.product_id) }}</span></div>
-                    <div class="mb-2 text-sm text-gray-500">Difficulty: <span :class="getDifficultyColor(rec.difficulty)" class="px-2 py-1 rounded-full text-xs font-semibold">{{ rec.difficulty }}</span></div>
-                    <div class="mb-2 text-sm text-gray-500">AI Confidence: <span class="font-bold">{{ Math.round(rec.ai_confidence * 100) }}%</span></div>
-                    <div class="mb-2 text-sm text-gray-500">Estimated Cost: <span class="font-bold">${{ rec.estimated_cost.toLocaleString() }}</span></div>
-                    <div class="mt-4 text-gray-700">{{ rec.details }}</div>
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <DialogClose as-child>
-                    <button class="px-3 py-1 bg-gray-200 rounded text-xs font-semibold hover:bg-gray-300">Close</button>
-                  </DialogClose>
-                  <button @click="downloadRecommendation(rec)" class="px-3 py-1 bg-secondary text-xs font-semibold rounded hover:bg-secondary/90 mr-2">Download Recommendation</button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            <p class="text-gray-700 mb-4">{{ rec.details }}</p>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-gray-500">AI Confidence: <span class="font-bold">{{ Math.round(rec.ai_confidence * 100) }}%</span></span>
+              <span class="text-xs text-gray-500">Estimated Cost: <span class="font-bold">${{ rec.estimated_cost.toLocaleString() }}</span></span>
+            </div>
+            <div class="h-2 bg-gray-100 rounded overflow-hidden">
+              <div
+                class="progress-bar h-full transition-all"
+                :class="[
+                  rec.ai_confidence >= 0.8 ? 'bg-green-500' :
+                  rec.ai_confidence >= 0.5 ? 'bg-yellow-500' :
+                  'bg-red-500'
+                ]"
+                :style="{ width: Math.round(rec.ai_confidence * 100) + '%' }"
+              />
+            </div>
+            <div class="flex gap-2 mt-4">
+              <button
+                v-if="!implementedIds.includes(rec.id)"
+                @click="markAsImplemented(rec.id)"
+                :disabled="loadingIds.includes(rec.id)"
+                class="px-3 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700 flex items-center gap-2"
+              >
+                <Loader2 v-if="loadingIds.includes(rec.id)" class="animate-spin w-4 h-4" />
+                <span>Mark as Implemented</span>
+              </button>
+              <Dialog>
+                <DialogTrigger as-child>
+                  <button class="px-3 py-1 bg-primary text-white rounded text-xs font-semibold hover:bg-primary/90">View Details</button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{{ rec.title }}</DialogTitle>
+                    <DialogDescription>
+                      <div class="mb-2 text-sm text-gray-500">Product: <span class="font-bold">{{ getProductName(rec.product_id) }}</span></div>
+                      <div class="mb-2 text-sm text-gray-500">Difficulty: <span :class="getDifficultyColor(rec.difficulty)" class="px-2 py-1 rounded-full text-xs font-semibold">{{ rec.difficulty }}</span></div>
+                      <div class="mb-2 text-sm text-gray-500">AI Confidence: <span class="font-bold">{{ Math.round(rec.ai_confidence * 100) }}%</span></div>
+                      <div class="mb-2 text-sm text-gray-500">Estimated Cost: <span class="font-bold">${{ rec.estimated_cost.toLocaleString() }}</span></div>
+                      <div class="mt-4 text-gray-700">{{ rec.details }}</div>
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <DialogClose as-child>
+                      <button class="px-3 py-1 bg-gray-200 rounded text-xs font-semibold hover:bg-gray-300">Close</button>
+                    </DialogClose>
+                    <button @click="downloadRecommendation(rec)" class="px-3 py-1 bg-secondary text-xs font-semibold rounded hover:bg-secondary/90 mr-2">Download Recommendation</button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  </div>
+  </TooltipProvider>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { CheckCircle, AlertTriangle, XCircle, Loader2 } from 'lucide-vue-next'
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectSeparator, SelectGroup, SelectLabel } from '@/components/ui/select'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 const products = ref([
   { id: '1', name: 'Eco Water Bottle' },
