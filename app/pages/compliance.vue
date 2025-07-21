@@ -34,8 +34,8 @@
           <Separator />
           <div class="space-y-2">
             <h4 class="font-medium">Regulation Profile:</h4>
-            <div class="grid grid-cols-2 gap-2">
-              <span v-for="profile in company.regulation_profile.split('-')" :key="profile" class="bg-gray-100 rounded px-2 py-1 text-xs font-mono">{{ profile }}</span>
+            <div class="flex flex-row flex-wrap gap-2">
+              <span v-for="profile in company.regulation_profile.split('-')" :key="profile" class="bg-gray-100 rounded-full px-3 py-1 text-xs font-mono border border-gray-300 shadow-sm">{{ profile }}</span>
             </div>
           </div>
         </CardContent>
