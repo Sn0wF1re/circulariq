@@ -50,6 +50,28 @@
               :style="{ width: Math.round(rec.ai_confidence * 100) + '%' }"
             />
           </div>
+          <Dialog>
+            <DialogTrigger as-child>
+              <button class="mt-4 px-3 py-1 bg-primary text-white rounded text-xs font-semibold hover:bg-primary/90">View Details</button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{{ rec.title }}</DialogTitle>
+                <DialogDescription>
+                  <div class="mb-2 text-sm text-gray-500">Product: <span class="font-bold">{{ getProductName(rec.product_id) }}</span></div>
+                  <div class="mb-2 text-sm text-gray-500">Difficulty: <span :class="getDifficultyColor(rec.difficulty)" class="px-2 py-1 rounded-full text-xs font-semibold">{{ rec.difficulty }}</span></div>
+                  <div class="mb-2 text-sm text-gray-500">AI Confidence: <span class="font-bold">{{ Math.round(rec.ai_confidence * 100) }}%</span></div>
+                  <div class="mb-2 text-sm text-gray-500">Estimated Cost: <span class="font-bold">${{ rec.estimated_cost.toLocaleString() }}</span></div>
+                  <div class="mt-4 text-gray-700">{{ rec.details }}</div>
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose as-child>
+                  <button class="px-3 py-1 bg-gray-200 rounded text-xs font-semibold hover:bg-gray-300">Close</button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </CardContent>
       </Card>
     </div>
@@ -59,6 +81,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { CheckCircle, AlertTriangle, XCircle } from 'lucide-vue-next'
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog'
 
 const products = ref([
   { id: '1', name: 'Eco Water Bottle' },
