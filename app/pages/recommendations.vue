@@ -27,7 +27,10 @@
               <div class="font-semibold text-lg">{{ rec.title }}</div>
               <div class="text-sm text-gray-500">{{ getProductName(rec.product_id) }}</div>
             </div>
-            <span :class="getDifficultyColor(rec.difficulty)" class="px-2 py-1 rounded-full text-xs font-semibold">{{ rec.difficulty }}</span>
+            <span class="flex items-center gap-1">
+              <component :is="getDifficultyIcon(rec.difficulty)" :class="getDifficultyIconColor(rec.difficulty)" class="w-4 h-4" />
+              <span :class="getDifficultyColor(rec.difficulty)" class="px-2 py-1 rounded-full text-xs font-semibold">{{ rec.difficulty }}</span>
+            </span>
           </div>
         </CardHeader>
         <CardContent>
@@ -55,6 +58,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { CheckCircle, AlertTriangle, XCircle } from 'lucide-vue-next'
 
 const products = ref([
   { id: '1', name: 'Eco Water Bottle' },
@@ -99,5 +103,18 @@ function getDifficultyColor(difficulty) {
   if (difficulty === 'Medium') return 'bg-yellow-100 text-yellow-800'
   if (difficulty === 'Hard') return 'bg-red-100 text-red-800'
   return 'bg-gray-100 text-gray-800'
+}
+
+function getDifficultyIcon(difficulty) {
+  if (difficulty === 'Easy') return CheckCircle
+  if (difficulty === 'Medium') return AlertTriangle
+  if (difficulty === 'Hard') return XCircle
+  return AlertTriangle
+}
+function getDifficultyIconColor(difficulty) {
+  if (difficulty === 'Easy') return 'text-green-500'
+  if (difficulty === 'Medium') return 'text-yellow-500'
+  if (difficulty === 'Hard') return 'text-red-500'
+  return 'text-gray-400'
 }
 </script>
