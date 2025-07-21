@@ -32,10 +32,11 @@
         </CardHeader>
         <CardContent>
           <p class="text-gray-700 mb-4">{{ rec.details }}</p>
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between mb-2">
             <span class="text-xs text-gray-500">AI Confidence: <span class="font-bold">{{ Math.round(rec.ai_confidence * 100) }}%</span></span>
             <span class="text-xs text-gray-500">Estimated Cost: <span class="font-bold">${{ rec.estimated_cost.toLocaleString() }}</span></span>
           </div>
+          <Progress :value="Math.round(rec.ai_confidence * 100)" class="h-2 bg-gray-100" />
         </CardContent>
       </Card>
     </div>
