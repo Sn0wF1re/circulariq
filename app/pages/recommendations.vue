@@ -4,7 +4,7 @@
       <h2 class="text-2xl font-bold">AI-Powered Recommendations</h2>
       <p class="text-gray-600">Intelligent suggestions to improve your sustainability profile</p>
     </div>
-    <div class="mb-4 w-full max-w-xs">
+    <div class="mb-4 w-full max-w-xs flex gap-4">
       <Select v-model="selectedProduct">
         <SelectTrigger>
           <SelectValue placeholder="Filter by product" />
@@ -16,6 +16,16 @@
             <SelectLabel>Products</SelectLabel>
             <SelectItem v-for="prod in products" :key="prod.id" :value="prod.id">{{ prod.name }}</SelectItem>
           </SelectGroup>
+        </SelectContent>
+      </Select>
+      <Select v-model="statusFilter" class="min-w-[120px]">
+        <SelectTrigger>
+          <SelectValue placeholder="Status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All</SelectItem>
+          <SelectItem value="unimplemented">Unimplemented</SelectItem>
+          <SelectItem value="implemented">Implemented</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -91,8 +101,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { CheckCircle, AlertTriangle, XCircle } from 'lucide-vue-next'
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog'
+import { CheckCircle, AlertTriangle, XCircle } from 'lucide-vue-next''
 
 const products = ref([
   { id: '1', name: 'Eco Water Bottle' },
@@ -121,11 +130,20 @@ const recommendations = ref([
 ])
 
 const selectedProduct = ref('all')
+const statusFilter = ref('all')
 const implementedIds = ref([])
 
 const filteredRecommendations = computed(() => {
-  if (selectedProduct.value === 'all') return recommendations.value
-  return recommendations.value.filter(rec => rec.product_id === selectedProduct.value)
+  let recs = recommendations.value
+  if (selectedProduct.value !== 'all') {
+    recs = recs.filter(rec => rec.product_id === selectedProduct.value)
+  }
+  if (statusFilter.value === 'implemented') {
+    recs = recs.filter(rec => implementedIds.value.includes(rec.id))
+  } else if (statusFilter.value === 'unimplemented') {
+    recs = recs.filter(rec => !implementedIds.value.includes(rec.id))
+  }
+  return recs
 })
 
 function getProductName(productId) {
