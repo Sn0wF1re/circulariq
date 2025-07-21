@@ -53,34 +53,36 @@
               :style="{ width: Math.round(rec.ai_confidence * 100) + '%' }"
             />
           </div>
-          <button
-            v-if="!implementedIds.includes(rec.id)"
-            @click="markAsImplemented(rec.id)"
-            class="mt-4 px-3 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700"
-          >Mark as Implemented</button>
-          <Dialog>
-            <DialogTrigger as-child>
-              <button class="mt-4 px-3 py-1 bg-primary text-white rounded text-xs font-semibold hover:bg-primary/90">View Details</button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{{ rec.title }}</DialogTitle>
-                <DialogDescription>
-                  <div class="mb-2 text-sm text-gray-500">Product: <span class="font-bold">{{ getProductName(rec.product_id) }}</span></div>
-                  <div class="mb-2 text-sm text-gray-500">Difficulty: <span :class="getDifficultyColor(rec.difficulty)" class="px-2 py-1 rounded-full text-xs font-semibold">{{ rec.difficulty }}</span></div>
-                  <div class="mb-2 text-sm text-gray-500">AI Confidence: <span class="font-bold">{{ Math.round(rec.ai_confidence * 100) }}%</span></div>
-                  <div class="mb-2 text-sm text-gray-500">Estimated Cost: <span class="font-bold">${{ rec.estimated_cost.toLocaleString() }}</span></div>
-                  <div class="mt-4 text-gray-700">{{ rec.details }}</div>
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <DialogClose as-child>
-                  <button class="px-3 py-1 bg-gray-200 rounded text-xs font-semibold hover:bg-gray-300">Close</button>
-                </DialogClose>
-                <button @click="downloadRecommendation(rec)" class="px-3 py-1 bg-secondary text-xs font-semibold rounded hover:bg-secondary/90 mr-2">Download Recommendation</button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <div class="flex gap-2 mt-4">
+            <button
+              v-if="!implementedIds.includes(rec.id)"
+              @click="markAsImplemented(rec.id)"
+              class="px-3 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700"
+            >Mark as Implemented</button>
+            <Dialog>
+              <DialogTrigger as-child>
+                <button class="px-3 py-1 bg-primary text-white rounded text-xs font-semibold hover:bg-primary/90">View Details</button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{{ rec.title }}</DialogTitle>
+                  <DialogDescription>
+                    <div class="mb-2 text-sm text-gray-500">Product: <span class="font-bold">{{ getProductName(rec.product_id) }}</span></div>
+                    <div class="mb-2 text-sm text-gray-500">Difficulty: <span :class="getDifficultyColor(rec.difficulty)" class="px-2 py-1 rounded-full text-xs font-semibold">{{ rec.difficulty }}</span></div>
+                    <div class="mb-2 text-sm text-gray-500">AI Confidence: <span class="font-bold">{{ Math.round(rec.ai_confidence * 100) }}%</span></div>
+                    <div class="mb-2 text-sm text-gray-500">Estimated Cost: <span class="font-bold">${{ rec.estimated_cost.toLocaleString() }}</span></div>
+                    <div class="mt-4 text-gray-700">{{ rec.details }}</div>
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <DialogClose as-child>
+                    <button class="px-3 py-1 bg-gray-200 rounded text-xs font-semibold hover:bg-gray-300">Close</button>
+                  </DialogClose>
+                  <button @click="downloadRecommendation(rec)" class="px-3 py-1 bg-secondary text-xs font-semibold rounded hover:bg-secondary/90 mr-2">Download Recommendation</button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardContent>
       </Card>
     </div>
