@@ -67,8 +67,12 @@
             <button
               v-if="!implementedIds.includes(rec.id)"
               @click="markAsImplemented(rec.id)"
-              class="px-3 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700"
-            >Mark as Implemented</button>
+              :disabled="loadingIds.includes(rec.id)"
+              class="px-3 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700 flex items-center gap-2"
+            >
+              <Loader2 v-if="loadingIds.includes(rec.id)" class="animate-spin w-4 h-4" />
+              <span>Mark as Implemented</span>
+            </button>
             <Dialog>
               <DialogTrigger as-child>
                 <button class="px-3 py-1 bg-primary text-white rounded text-xs font-semibold hover:bg-primary/90">View Details</button>
@@ -101,7 +105,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { CheckCircle, AlertTriangle, XCircle } from 'lucide-vue-next''
+import { CheckCircle, AlertTriangle, XCircle, Loader2 } from 'lucide-vue-next'
 
 const products = ref([
   { id: '1', name: 'Eco Water Bottle' },
@@ -132,6 +136,7 @@ const recommendations = ref([
 const selectedProduct = ref('all')
 const statusFilter = ref('all')
 const implementedIds = ref([])
+const loadingIds = ref([])
 
 const filteredRecommendations = computed(() => {
   let recs = recommendations.value
@@ -173,7 +178,11 @@ function getDifficultyIconColor(difficulty) {
 
 function markAsImplemented(id) {
   if (!implementedIds.value.includes(id)) {
-    implementedIds.value.push(id)
+    loadingIds.value.push(id)
+    setTimeout(() => {
+      implementedIds.value.push(id)
+      loadingIds.value = loadingIds.value.filter(lid => lid !== id)
+    }, 800) // Simulate async
   }
 }
 
