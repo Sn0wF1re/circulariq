@@ -69,6 +69,7 @@
                 <DialogClose as-child>
                   <button class="px-3 py-1 bg-gray-200 rounded text-xs font-semibold hover:bg-gray-300">Close</button>
                 </DialogClose>
+                <button @click="downloadRecommendation(rec)" class="px-3 py-1 bg-secondary text-xs font-semibold rounded hover:bg-secondary/90 mr-2">Download Recommendation</button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -139,5 +140,17 @@ function getDifficultyIconColor(difficulty) {
   if (difficulty === 'Medium') return 'text-yellow-500'
   if (difficulty === 'Hard') return 'text-red-500'
   return 'text-gray-400'
+}
+
+function downloadRecommendation(rec) {
+  // Placeholder: will be replaced with real PDF export
+  const details = `Recommendation: ${rec.title}\nProduct: ${getProductName(rec.product_id)}\nDifficulty: ${rec.difficulty}\nAI Confidence: ${Math.round(rec.ai_confidence * 100)}%\nEstimated Cost: $${rec.estimated_cost.toLocaleString()}\nDetails: ${rec.details}`
+  const blob = new Blob([details], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${rec.title.replace(/\s+/g, '_')}.txt`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 </script>
