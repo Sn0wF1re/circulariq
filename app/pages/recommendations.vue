@@ -36,15 +36,17 @@
             <span class="text-xs text-gray-500">AI Confidence: <span class="font-bold">{{ Math.round(rec.ai_confidence * 100) }}%</span></span>
             <span class="text-xs text-gray-500">Estimated Cost: <span class="font-bold">${{ rec.estimated_cost.toLocaleString() }}</span></span>
           </div>
-          <Progress :value="Math.round(rec.ai_confidence * 100)"
-            :max="100"
-            :class="[
-              'h-2',
-              rec.ai_confidence >= 0.8 ? 'bg-green-200 [&_.progress-bar]:bg-green-500' :
-              rec.ai_confidence >= 0.5 ? 'bg-yellow-200 [&_.progress-bar]:bg-yellow-500' :
-              'bg-red-200 [&_.progress-bar]:bg-red-500'
-            ]"
-          />
+          <div class="h-2 bg-gray-100 rounded overflow-hidden">
+            <div
+              class="progress-bar h-full transition-all"
+              :class="[
+                rec.ai_confidence >= 0.8 ? 'bg-green-500' :
+                rec.ai_confidence >= 0.5 ? 'bg-yellow-500' :
+                'bg-red-500'
+              ]"
+              :style="{ width: Math.round(rec.ai_confidence * 100) + '%' }"
+            />
+          </div>
         </CardContent>
       </Card>
     </div>
