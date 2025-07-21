@@ -4,8 +4,23 @@
       <h2 class="text-2xl font-bold">AI-Powered Recommendations</h2>
       <p class="text-gray-600">Intelligent suggestions to improve your sustainability profile</p>
     </div>
+    <div class="mb-4 w-full max-w-xs">
+      <Select v-model="selectedProduct">
+        <SelectTrigger>
+          <SelectValue placeholder="Filter by product" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Products</SelectItem>
+          <SelectSeparator />
+          <SelectGroup>
+            <SelectLabel>Products</SelectLabel>
+            <SelectItem v-for="prod in products" :key="prod.id" :value="prod.id">{{ prod.name }}</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </div>
     <div class="space-y-4">
-      <Card v-for="rec in recommendations" :key="rec.id">
+      <Card v-for="rec in filteredRecommendations" :key="rec.id">
         <CardHeader>
           <div class="flex items-start justify-between">
             <div>
@@ -28,7 +43,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const products = ref([
   { id: '1', name: 'Eco Water Bottle' },
@@ -55,6 +70,13 @@ const recommendations = ref([
     difficulty: 'Hard'
   }
 ])
+
+const selectedProduct = ref('all')
+
+const filteredRecommendations = computed(() => {
+  if (selectedProduct.value === 'all') return recommendations.value
+  return recommendations.value.filter(rec => rec.product_id === selectedProduct.value)
+})
 
 function getProductName(productId) {
   const product = products.value.find(p => p.id === productId)
