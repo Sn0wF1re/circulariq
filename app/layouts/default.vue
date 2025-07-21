@@ -36,27 +36,27 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <Tabs v-model="activeTab" class="space-y-6">
         <TabsList class="grid w-full grid-cols-6 bg-white">
-          <TabsTrigger value="dashboard" class="flex items-center gap-2">
+          <TabsTrigger value="dashboard" class="flex items-center gap-2" @click="goToTab('dashboard')">
             <IconBarChart3 class="w-4 h-4" />
             Dashboard
           </TabsTrigger>
-          <TabsTrigger value="products" class="flex items-center gap-2">
+          <TabsTrigger value="products" class="flex items-center gap-2" @click="goToTab('products')">
             <IconPackage class="w-4 h-4" />
             Products
           </TabsTrigger>
-          <TabsTrigger value="reports" class="flex items-center gap-2">
+          <TabsTrigger value="reports" class="flex items-center gap-2" @click="goToTab('reports')">
             <IconFileText class="w-4 h-4" />
             Reports
           </TabsTrigger>
-          <TabsTrigger value="compliance" class="flex items-center gap-2">
+          <TabsTrigger value="compliance" class="flex items-center gap-2" @click="goToTab('compliance')">
             <IconCheckCircle class="w-4 h-4" />
             Compliance
           </TabsTrigger>
-          <TabsTrigger value="recommendations" class="flex items-center gap-2">
+          <TabsTrigger value="recommendations" class="flex items-center gap-2" @click="goToTab('recommendations')">
             <IconTrendingUp class="w-4 h-4" />
             AI Insights
           </TabsTrigger>
-          <TabsTrigger value="upload" class="flex items-center gap-2">
+          <TabsTrigger value="upload" class="flex items-center gap-2" @click="goToTab('upload')">
             <IconUpload class="w-4 h-4" />
             Data Upload
           </TabsTrigger>
@@ -72,8 +72,38 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { Bell as IconBell, Settings as IconSettings, LogOut as IconLogOut, BarChart3 as IconBarChart3, Package as IconPackage, FileText as IconFileText, CheckCircle as IconCheckCircle, TrendingUp as IconTrendingUp, Upload as IconUpload } from 'lucide-vue-next'
 
-const activeTab = ref('dashboard')
+const router = useRouter()
+const route = useRoute()
+const tabToRoute = {
+  dashboard: '/dashboard',
+  products: '/products',
+  reports: '/reports',
+  compliance: '/compliance',
+  recommendations: '/recommendations',
+  upload: '/upload',
+}
+const routeToTab = {
+  '/dashboard': 'dashboard',
+  '/products': 'products',
+  '/reports': 'reports',
+  '/compliance': 'compliance',
+  '/recommendations': 'recommendations',
+  '/upload': 'upload',
+}
+const activeTab = ref(routeToTab[route.path] || 'dashboard')
+
+function goToTab(tab) {
+  if (tabToRoute[tab]) {
+    router.push(tabToRoute[tab])
+    activeTab.value = tab
+  }
+}
+
+watch(() => route.path, (newPath) => {
+  activeTab.value = routeToTab[newPath] || 'dashboard'
+})
 </script>
