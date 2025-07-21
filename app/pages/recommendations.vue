@@ -40,10 +40,17 @@
               </div>
               <div class="text-sm text-gray-500">{{ getProductName(rec.product_id) }}</div>
             </div>
-            <span class="flex items-center gap-1">
-              <component :is="getDifficultyIcon(rec.difficulty)" :class="getDifficultyIconColor(rec.difficulty)" class="w-4 h-4" />
-              <span :class="getDifficultyColor(rec.difficulty)" class="px-2 py-1 rounded-full text-xs font-semibold">{{ rec.difficulty }}</span>
-            </span>
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <span class="flex items-center gap-1">
+                  <component :is="getDifficultyIcon(rec.difficulty)" :class="getDifficultyIconColor(rec.difficulty)" class="w-4 h-4" />
+                  <span :class="getDifficultyColor(rec.difficulty)" class="px-2 py-1 rounded-full text-xs font-semibold">{{ rec.difficulty }}</span>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                {{ getDifficultyDescription(rec.difficulty) }}
+              </TooltipContent>
+            </Tooltip>
           </div>
         </CardHeader>
         <CardContent>
@@ -106,6 +113,9 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { CheckCircle, AlertTriangle, XCircle, Loader2 } from 'lucide-vue-next'
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectSeparator, SelectGroup, SelectLabel } from '@/components/ui/select'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 const products = ref([
   { id: '1', name: 'Eco Water Bottle' },
@@ -174,6 +184,13 @@ function getDifficultyIconColor(difficulty) {
   if (difficulty === 'Medium') return 'text-yellow-500'
   if (difficulty === 'Hard') return 'text-red-500'
   return 'text-gray-400'
+}
+
+function getDifficultyDescription(difficulty) {
+  if (difficulty === 'Easy') return 'Low effort, quick win.'
+  if (difficulty === 'Medium') return 'Moderate effort, some complexity.'
+  if (difficulty === 'Hard') return 'High effort, significant complexity.'
+  return 'Unknown difficulty.'
 }
 
 function markAsImplemented(id) {
