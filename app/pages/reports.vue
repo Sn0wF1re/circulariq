@@ -44,19 +44,25 @@
           <CardTitle>Report Templates</CardTitle>
           <CardDescription>Pre-configured report formats</CardDescription>
         </CardHeader>
-        <CardContent class="space-y-3">
-          <button class="border px-4 py-2 rounded-lg w-full flex items-center gap-2">
-            <FileText class="w-4 h-4 mr-2" /> EU Compliance Report
-          </button>
-          <button class="border px-4 py-2 rounded-lg w-full flex items-center gap-2">
-            <FileText class="w-4 h-4 mr-2" /> Carbon Footprint Summary
-          </button>
-          <button class="border px-4 py-2 rounded-lg w-full flex items-center gap-2">
-            <FileText class="w-4 h-4 mr-2" /> Recyclability Assessment
-          </button>
-          <button class="border px-4 py-2 rounded-lg w-full flex items-center gap-2">
-            <FileText class="w-4 h-4 mr-2" /> Custom Report Builder
-          </button>
+        <CardContent>
+          <div class="flex flex-col gap-4">
+            <button class="border px-4 py-3 rounded-lg w-full flex items-center gap-3 bg-white hover:bg-gray-50 transition">
+              <FileText class="w-5 h-5 mr-2 text-gray-600" />
+              <span class="font-medium">EU Compliance Report</span>
+            </button>
+            <button class="border px-4 py-3 rounded-lg w-full flex items-center gap-3 bg-white hover:bg-gray-50 transition">
+              <FileText class="w-5 h-5 mr-2 text-gray-600" />
+              <span class="font-medium">Carbon Footprint Summary</span>
+            </button>
+            <button class="border px-4 py-3 rounded-lg w-full flex items-center gap-3 bg-white hover:bg-gray-50 transition">
+              <FileText class="w-5 h-5 mr-2 text-gray-600" />
+              <span class="font-medium">Recyclability Assessment</span>
+            </button>
+            <button class="border px-4 py-3 rounded-lg w-full flex items-center gap-3 bg-white hover:bg-gray-50 transition">
+              <FileText class="w-5 h-5 mr-2 text-gray-600" />
+              <span class="font-medium">Custom Report Builder</span>
+            </button>
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -65,7 +71,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from 'shadcn-vue'
 import { Download, FileText } from 'lucide-vue-next'
 
 const products = ref([
