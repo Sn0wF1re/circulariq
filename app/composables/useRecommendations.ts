@@ -2,8 +2,8 @@ import { ref } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 
 // Replace with your actual Supabase project URL and anon key
-default const supabaseUrl = process.env.NUXT_PUBLIC_SUPABASE_URL || '<your-supabase-url>'
-default const supabaseKey = process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || '<your-supabase-key>'
+const supabaseUrl = process.env.NUXT_PUBLIC_SUPABASE_URL || '<your-supabase-url>'
+const supabaseKey = process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || '<your-supabase-key>'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 export function useRecommendations() {
