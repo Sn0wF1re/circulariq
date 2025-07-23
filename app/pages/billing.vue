@@ -148,33 +148,30 @@
     </div>
 
     <!-- Usage Alerts -->
-    <Card class="mt-6">
-      <CardHeader>
-        <CardTitle>Usage Alerts</CardTitle>
-        <CardDescription>Monitor your plan limits</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div v-if="usageAlerts.length > 0" class="space-y-3">
-          <Alert v-for="(alert, index) in usageAlerts" :key="index" variant="warning">
-            <div class="flex items-start gap-3">
-              <IconAlertTriangle class="h-5 w-5 text-yellow-600 mt-1" />
-              <div class="flex flex-col">
-                <div class="flex items-center gap-2">
-                  <AlertTitle class="text-yellow-900 font-semibold">Usage Warning</AlertTitle>
-                </div>
-                <AlertDescription class="text-yellow-700/90 mt-1">{{ alert.message }}</AlertDescription>
-              </div>
-            </div>
-          </Alert>
-        </div>
-        <div v-else class="text-center py-8">
-          <div class="flex flex-col items-center">
-            <IconCheckCircle class="w-12 h-12 text-green-600 mb-2" />
-            <p class="text-gray-600">All usage levels are within normal limits</p>
+    <!-- Usage Alerts -->
+    <div class="mt-6">
+      <h3 class="text-lg font-bold mb-2">Usage Alerts</h3>
+      <p class="text-gray-600 mb-4">Monitor your plan limits</p>
+      <div v-if="usageAlerts.length > 0" class="space-y-3">
+        <div
+          v-for="(alert, index) in usageAlerts"
+          :key="index"
+          class="flex items-start gap-3 p-4 rounded-lg bg-yellow-50 mb-0"
+        >
+          <IconAlertTriangle class="w-6 h-6 text-yellow-500 mt-1 flex-shrink-0" />
+          <div>
+            <div class="font-semibold text-yellow-900">Usage Warning</div>
+            <div class="text-sm text-yellow-800">{{ alert.message }}</div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      <div v-else class="text-center py-8">
+        <div class="flex flex-col items-center">
+          <IconCheckCircle class="w-12 h-12 text-green-600 mb-2" />
+          <p class="text-gray-600">All usage levels are within normal limits</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
