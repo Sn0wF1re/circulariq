@@ -163,7 +163,7 @@ const {
   markAsImplemented: markAsImplementedSupabase
 } = useRecommendations(supabase)
 
-const { products, fetchProducts } = useProducts()
+const { products, fetchProducts } = useProducts(supabase)
 
 onMounted(() => {
   fetchRecommendations()
