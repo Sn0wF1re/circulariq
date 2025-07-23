@@ -27,3 +27,4 @@ logs
 .vscode
 
 react-import.tsx
+schema.sql
