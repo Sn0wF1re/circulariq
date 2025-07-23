@@ -1,11 +1,6 @@
 import { ref } from 'vue'
-import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NUXT_PUBLIC_SUPABASE_URL || '<your-supabase-url>'
-const supabaseKey = process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || '<your-supabase-key>'
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-export function useProducts() {
+export function useProducts(supabase) {
   const products = ref([])
   const loading = ref(false)
 
