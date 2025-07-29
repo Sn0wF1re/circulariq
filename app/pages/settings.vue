@@ -1,12 +1,3 @@
-<script setup lang="ts">
-import { useSupabaseClient } from '#imports'
-import { useSettings } from '~/app/composables/useSettings'
-
-const supabase = useSupabaseClient()
-const companyId = 'company-1' // TODO: Replace with actual logic
-
-const { settings, error, loading, refetch, updateSettings } = useSettings(supabase, { companyId })
-</script>
 <template>
   <div class="space-y-6 p-6">
     <div>
@@ -138,40 +129,23 @@ const { settings, error, loading, refetch, updateSettings } = useSettings(supaba
         <CardContent class="space-y-4">
           <div class="flex flex-col gap-1">
             <Label for="company-name">Company Name</Label>
-            <Input id="company-name" placeholder="EcoTech Solutions" />
+            <Input id="company-name" v-model="companyName" placeholder="EcoTech Solutions" />
           </div>
           <div class="flex flex-col gap-1">
-            <Label for="industry">Industry</Label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Select industry" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="technology">Technology</SelectItem>
-                <SelectItem value="packaging">Packaging</SelectItem>
-                <SelectItem value="manufacturing">Manufacturing</SelectItem>
-                <SelectItem value="retail">Retail</SelectItem>
-                <SelectItem value="food">Food & Beverage</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label for="sector">Sector</Label>
+            <Input id="sector" v-model="sector" placeholder="Technology" />
           </div>
           <div class="flex flex-col gap-1">
-            <Label for="company-size">Company Size</Label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Select size" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="small">1-50 employees</SelectItem>
-                <SelectItem value="medium">51-200 employees</SelectItem>
-                <SelectItem value="large">201-1000 employees</SelectItem>
-                <SelectItem value="enterprise">1000+ employees</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label for="region">Region</Label>
+            <Input id="region" v-model="region" placeholder="North America" />
           </div>
           <div class="flex flex-col gap-1">
-            <Label for="headquarters">Headquarters</Label>
-            <Input id="headquarters" placeholder="San Francisco, CA" />
+            <Label for="regulation-profile">Regulation Profile</Label>
+            <Input id="regulation-profile" v-model="regulationProfile" placeholder="EU Packaging" />
+          </div>
+          <div class="flex flex-col gap-1">
+            <Label for="compliance-status">Compliance Status</Label>
+            <Input id="compliance-status" v-model="complianceStatus" placeholder="Compliant" />
           </div>
           <Button class="bg-[#28A745] hover:bg-[#14532D]">
             Update Company
@@ -183,5 +157,24 @@ const { settings, error, loading, refetch, updateSettings } = useSettings(supaba
 </template>
 
 <script setup lang="ts">
-// Add any necessary imports and logic here as migration progresses
+import { ref, watchEffect } from 'vue'
+const { company, loading, error, refresh } = useCompanies()
+
+// v-models for company fields (matching schema)
+const companyName = ref('')
+const sector = ref('')
+const region = ref('')
+const regulationProfile = ref('')
+const complianceStatus = ref('')
+
+// Watch for company data and update v-models
+watchEffect(() => {
+  if (company.value) {
+    companyName.value = company.value.name || ''
+    sector.value = company.value.sector || ''
+    region.value = company.value.region || ''
+    regulationProfile.value = company.value.regulation_profile || ''
+    complianceStatus.value = (typeof company.value.compliance_status === 'object' ? company.value.compliance_status.status : company.value.compliance_status) || ''
+  }
+})
 </script>
