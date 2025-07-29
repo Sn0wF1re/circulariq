@@ -153,6 +153,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { Download } from 'lucide-vue-next'
+const { uploadHistory, loading, error, refresh, uploadFile, addProduct } = useUploads({ useMock: false })
 
 const form = reactive({
   name: '',
@@ -165,15 +166,26 @@ const form = reactive({
 
 const fileInput = ref<HTMLInputElement | null>(null)
 
-function addProduct() {
-  // TODO: Implement add product logic
+async function addProductHandler() {
+  await addProduct({ ...form })
+  form.name = ''
+  form.sku = ''
+  form.material = ''
+  form.weight = ''
+  form.recycled_pct = ''
+  form.recyclability_pct = ''
 }
 
 function triggerFileInput() {
   fileInput.value?.click()
 }
 
-function onFileChange(e: Event) {
-  // TODO: Implement file upload logic
+async function onFileChange(e: Event) {
+  const files = (e.target as HTMLInputElement).files
+  if (!files) return
+  for (const file of Array.from(files)) {
+    await uploadFile(file)
+  }
+  (e.target as HTMLInputElement).value = ''
 }
 </script>
