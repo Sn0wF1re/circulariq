@@ -1,13 +1,3 @@
-<script setup lang="ts">
-import { useSupabaseClient } from '#imports'
-import { useNotifications } from '~/app/composables/useNotifications'
-
-const supabase = useSupabaseClient()
-const companyId = 'company-1' // TODO: Replace with actual logic
-const userId = 'user-1' // TODO: Replace with actual logic
-
-const { notifications, error, loading, refetch } = useNotifications(supabase, { companyId, userId })
-</script>
 <template>
   <div class="space-y-6 p-6">
     <div>
@@ -23,7 +13,7 @@ const { notifications, error, loading, refetch } = useNotifications(supabase, { 
           <CardDescription>Latest updates and alerts from your account</CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">
-          <template v-for="(notification, i) in notificationsToShow" :key="i">
+          <template v-for="(notification, i) in notifications" :key="i">
             <div
               class="flex items-start space-x-3 p-4 rounded-lg"
               :class="notification.bg"
@@ -97,41 +87,5 @@ const { notifications, error, loading, refetch } = useNotifications(supabase, { 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-// Placeholder notifications
-const placeholderNotifications = [
-  {
-    title: 'New EU Regulation Update',
-    description: 'Extended Producer Responsibility regulations have been updated for Q2 2024',
-    time: '2 hours ago',
-    bg: 'bg-blue-50',
-    dot: 'bg-blue-500',
-  },
-  {
-    title: 'Compliance Score Improved',
-    description: 'Your overall compliance score has increased to 87% (+2%)',
-    time: '1 day ago',
-    bg: 'bg-green-50',
-    dot: 'bg-green-500',
-  },
-  {
-    title: 'Report Generation Complete',
-    description: 'Your Q1 2024 sustainability report is ready for download',
-    time: '2 days ago',
-    bg: 'bg-yellow-50',
-    dot: 'bg-yellow-500',
-  },
-  {
-    title: 'Action Required',
-    description: 'Product BFC-002 requires updated recycling data to maintain compliance',
-    time: '3 days ago',
-    bg: 'bg-red-50',
-    dot: 'bg-red-500',
-    action: 'View',
-  },
-]
-
-// This would be replaced by real data from an API or composable
-const notifications = ref(null)
-
-const notificationsToShow = computed(() => notifications.value && notifications.value.length > 0 ? notifications.value : placeholderNotifications)
+const { notifications, loading, error, refresh } = useNotifications()
 </script>
