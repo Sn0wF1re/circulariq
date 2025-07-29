@@ -1,19 +1,3 @@
-<script setup lang="ts">
-import { useSupabaseClient } from '#imports'
-import { useKpi } from '~/app/composables/useKpi'
-import { useDashboardData } from '~/app/composables/useDashboardData'
-import { ref, watch } from 'vue'
-
-const supabase = useSupabaseClient()
-const selectedCompany = ref('company-1') // TODO: Replace with actual logic
-
-const { kpi, error: kpiError, loading: kpiLoading, refetch: refetchKpi } = useKpi(supabase, { companyId: selectedCompany.value })
-const { companies, loading: companiesLoading } = useDashboardData(supabase, { companyId: selectedCompany.value })
-
-watch(selectedCompany, () => {
-  refetchKpi()
-})
-</script>
 <template>
   <div>
     <!-- Company Selector -->
@@ -95,20 +79,21 @@ watch(selectedCompany, () => {
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useCompanies } from '../composables/useCompanies'
+import { ref, watch, onMounted } from 'vue'
 import { Package as IconPackage, Recycle as IconRecycle, AlertTriangle as IconAlertTriangle, CheckCircle as IconCheckCircle, Building2 as IconBuilding2 } from 'lucide-vue-next'
 
 const { companies } = useCompanies()
-const selectedCompany = ref(companies.value[0]?.id || '')
+const { kpi, loading, error, fetchKpi } = useDashboardData()
+const selectedCompany = ref('')
 
-const kpi = computed(() => {
-  // Example mock KPIs, could be dynamic per company
-  return {
-    plasticUsage: 2140,
-    recyclability: 78,
-    co2e: 5.3,
-    compliance: 85
+onMounted(() => {
+  if (companies.value.length > 0) {
+    selectedCompany.value = companies.value[0].id
+    fetchKpi(selectedCompany.value)
   }
+})
+
+watch(selectedCompany, (newId) => {
+  if (newId) fetchKpi(newId)
 })
 </script>
