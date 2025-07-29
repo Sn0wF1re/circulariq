@@ -113,57 +113,12 @@
 </template>
 
 <script setup>
+
 import { ref, computed, onMounted } from 'vue'
-import { createClient } from '@supabase/supabase-js'
 import { CheckCircle, AlertTriangle, XCircle, Loader2 } from 'lucide-vue-next'
-import { useRecommendations } from '@/composables/useRecommendations'
-import { useProducts } from '@/composables/useProducts'
 
-// Fallback mock recommendations for development/empty state
-const fallbackRecommendations = [
-  {
-    id: '1',
-    title: 'Switch to Renewable Energy',
-    details: 'Transition your operations to renewable energy sources to reduce carbon footprint.',
-    product_id: 'prod1',
-    difficulty: 'Medium',
-    ai_confidence: 0.85,
-    estimated_cost: 12000,
-    implemented: false
-  },
-  {
-    id: '2',
-    title: 'Optimize Logistics',
-    details: 'Improve logistics efficiency to minimize emissions and costs.',
-    product_id: 'prod2',
-    difficulty: 'Easy',
-    ai_confidence: 0.78,
-    estimated_cost: 5000,
-    implemented: false
-  },
-  {
-    id: '3',
-    title: 'Eco-friendly Packaging',
-    details: 'Adopt biodegradable or recyclable packaging materials.',
-    product_id: 'prod3',
-    difficulty: 'Hard',
-    ai_confidence: 0.65,
-    estimated_cost: 20000,
-    implemented: false
-  }
-]
-
-const config = useRuntimeConfig();
-const supabase = createClient(config.public.supabaseUrl, config.public.supabaseAnonKey);
-const {
-  recommendations,
-  implementedIds,
-  loading,
-  fetchRecommendations,
-  markAsImplemented: markAsImplementedSupabase
-} = useRecommendations(supabase)
-
-const { products, fetchProducts } = useProducts(supabase)
+const { recommendations, implementedIds, loading, fetchRecommendations, markAsImplemented } = useRecommendations()
+const { products, fetchProducts } = useProducts()
 
 onMounted(() => {
   fetchRecommendations()
@@ -175,7 +130,7 @@ const statusFilter = ref('all')
 const loadingIds = ref([])
 
 const filteredRecommendations = computed(() => {
-  let recs = recommendations.value && recommendations.value.length > 0 ? recommendations.value : fallbackRecommendations
+  let recs = recommendations.value
   if (selectedProduct.value !== 'all') {
     recs = recs.filter(rec => rec.product_id === selectedProduct.value)
   }
@@ -219,10 +174,10 @@ function getDifficultyDescription(difficulty) {
   return 'Unknown difficulty.'
 }
 
-function markAsImplemented(id) {
+function markAsImplementedHandler(id) {
   if (!implementedIds.value.includes(id)) {
     loadingIds.value.push(id)
-    markAsImplementedSupabase(id).finally(() => {
+    markAsImplemented(id).finally(() => {
       loadingIds.value = loadingIds.value.filter(lid => lid !== id)
     })
   }

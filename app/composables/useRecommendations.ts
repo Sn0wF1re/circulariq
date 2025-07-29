@@ -1,127 +1,91 @@
-import { ref, computed, watch, shallowRef, onMounted } from 'vue'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Ref, ShallowRef } from 'vue'
+import { ref } from 'vue'
 
-const isClient = typeof window !== 'undefined'
-
-interface Recommendation {
-  id: string
-  product_id: string
-  title: string
-  details: string
-  ai_confidence: number
-  estimated_cost: number
-  difficulty: string
-  implemented?: boolean
-  // ...other fields
-}
-
-interface UseRecommendationsOptions {
-  companyId: string
-  useMock?: boolean
-}
-
-type UseRecommendationsReturn = {
-  recommendations: ShallowRef<Recommendation[]>
-  implementedIds: ShallowRef<string[]>
-  loading: Ref<boolean>
-  errorMsg: Ref<string>
-  fetchRecommendations: () => Promise<void>
-  markAsImplemented: (id: string) => Promise<void>
-}
-
-// Mock data
-const mockRecommendations: Recommendation[] = [
-  { id: 'rec1', product_id: 'p1', title: 'Switch to recycled plastic', details: 'Use 80% recycled content', ai_confidence: 0.92, estimated_cost: 1000, difficulty: 'Medium', implemented: false },
-  { id: 'rec2', product_id: 'p2', title: 'Reduce packaging weight', details: 'Lightweight design', ai_confidence: 0.85, estimated_cost: 500, difficulty: 'Easy', implemented: true },
+// ---- 1. Mock Data ----
+const mockRecommendations = [
+  {
+    id: '1',
+    title: 'Switch to Renewable Energy',
+    details: 'Transition your operations to renewable energy sources to reduce carbon footprint.',
+    product_id: 'prod1',
+    difficulty: 'Medium',
+    ai_confidence: 0.85,
+    estimated_cost: 12000,
+    implemented: false
+  },
+  {
+    id: '2',
+    title: 'Optimize Logistics',
+    details: 'Improve logistics efficiency to minimize emissions and costs.',
+    product_id: 'prod2',
+    difficulty: 'Easy',
+    ai_confidence: 0.78,
+    estimated_cost: 5000,
+    implemented: false
+  },
+  {
+    id: '3',
+    title: 'Eco-friendly Packaging',
+    details: 'Adopt biodegradable or recyclable packaging materials.',
+    product_id: 'prod3',
+    difficulty: 'Hard',
+    ai_confidence: 0.65,
+    estimated_cost: 20000,
+    implemented: false
+  }
 ]
 
-// Simple in-memory cache by companyId
-const recommendationsCache = new Map<string, Recommendation[]>()
-
-export function useRecommendations(
-  supabase: SupabaseClient,
-  options: UseRecommendationsOptions
-): UseRecommendationsReturn {
-  const recommendations = shallowRef<Recommendation[]>([])
-  const implementedIds = shallowRef<string[]>([])
+export function useRecommendations({ useMock = false } = {}) {
+  const supabase = useSupabaseClient()
+  const recommendations = ref<any[]>([])
+  const implementedIds = ref<string[]>([])
   const loading = ref(false)
-  const errorMsg = ref('')
-
-  const useMock = computed(() => options.useMock || process.env.NODE_ENV === 'development')
+  const error = ref<string | null>(null)
 
   async function fetchRecommendations() {
-    if (!isClient && !useMock.value) return // SSR: skip on server unless using mock
-    loading.value = true
-    errorMsg.value = ''
-
-    // Caching
-    if (!useMock.value && recommendationsCache.has(options.companyId)) {
-      recommendations.value = recommendationsCache.get(options.companyId)!
-      implementedIds.value = recommendations.value.filter(r => r.implemented).map(r => r.id)
-      loading.value = false
-      return
-    }
-
-    if (useMock.value) {
+    if (useMock) {
       recommendations.value = mockRecommendations
       implementedIds.value = mockRecommendations.filter(r => r.implemented).map(r => r.id)
-      loading.value = false
       return
     }
-
-    let recData, recErr
+    loading.value = true
+    error.value = null
     try {
-      // Join with products to filter by company
-      const { data, error } = await supabase
-        .from('recommendations')
-        .select('*, products!inner(company_id)')
-        .eq('products.company_id', options.companyId)
-      if (error) throw error
-      recData = data
-      recommendations.value = recData || []
-      implementedIds.value = (recData || []).filter((r: any) => r.implemented).map((r: any) => r.id)
-      recommendationsCache.set(options.companyId, recommendations.value)
-    } catch (err: any) {
-      errorMsg.value = err.message || 'Failed to fetch recommendations.'
+      const { data, error: recError } = await supabase.from('recommendations').select('*')
+      if (recError) throw recError
+      recommendations.value = data || []
+      implementedIds.value = (data || []).filter(r => r.implemented).map(r => r.id)
+    } catch (e: any) {
+      error.value = e.message || 'Failed to fetch recommendations.'
+      recommendations.value = mockRecommendations
+      implementedIds.value = mockRecommendations.filter(r => r.implemented).map(r => r.id)
+    } finally {
       loading.value = false
-      return
     }
-    loading.value = false
   }
 
   async function markAsImplemented(id: string) {
     loading.value = true
-    errorMsg.value = ''
+    error.value = null
     try {
-      const { error } = await supabase.from('recommendations').update({ implemented: true }).eq('id', id)
-      if (error) throw error
+      const { error: updateError } = await supabase.from('recommendations').update({ implemented: true }).eq('id', id)
+      if (updateError) throw updateError
       if (!implementedIds.value.includes(id)) implementedIds.value.push(id)
-      // Optionally update the recommendation in the list
+      // Optionally update the local recommendation object
       const rec = recommendations.value.find(r => r.id === id)
       if (rec) rec.implemented = true
-    } catch (err: any) {
-      errorMsg.value = err.message || 'Failed to update recommendation.'
+    } catch (e: any) {
+      error.value = e.message || 'Failed to update recommendation.'
+    } finally {
+      loading.value = false
     }
-    loading.value = false
-  }
-
-  watch(() => options.companyId, () => {
-    fetchRecommendations()
-  }, { immediate: true })
-
-  if (isClient) {
-    onMounted(() => {
-      fetchRecommendations()
-    })
   }
 
   return {
     recommendations,
     implementedIds,
     loading,
-    errorMsg,
+    error,
     fetchRecommendations,
-    markAsImplemented,
+    markAsImplemented
   }
 }
