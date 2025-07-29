@@ -1,123 +1,120 @@
-// Composable: useBilling
-// Fetches billing info for a company
-// Usage: const { billing, error, loading, refetch } = useBilling(supabase, { companyId, useMock })
+import { ref, computed, onMounted } from 'vue'
+import { useSupabaseClient, useSupabaseUser } from '#imports'
 
-import { ref, computed, watch, shallowRef, onMounted } from 'vue'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Ref, ShallowRef } from 'vue'
+// ---- 1. Mock Data (from billing page) ----
+const mockBillingPlans = [
+  {
+    id: 1,
+    name: 'Starter',
+    monthly_price: 49,
+    sku_limit: 100,
+    user_limit: 5,
+    report_limit: 10,
+    features: ['Basic analytics', 'Email support', 'Up to 5 users'],
+  },
+  {
+    id: 2,
+    name: 'Growth',
+    monthly_price: 149,
+    sku_limit: 1000,
+    user_limit: 25,
+    report_limit: 50,
+    features: ['Advanced analytics', 'Priority support', 'Up to 25 users', 'Custom branding'],
+  },
+  {
+    id: 3,
+    name: 'Enterprise',
+    monthly_price: 499,
+    sku_limit: 10000,
+    user_limit: 100,
+    report_limit: 200,
+    features: ['All features', 'Dedicated manager', 'Unlimited users', 'API access'],
+  },
+]
 
-const isClient = typeof window !== 'undefined'
-
-interface BillingInfo {
-  id: string
-  company_id: string
-  plan: string
-  status: string
-  next_invoice_date: string
-  amount_due: number
-  last_payment_date: string
-  last_payment_amount: number
-  payment_method: string
-  billing_email: string
-  created_at: string
-  updated_at: string
+const mockCompanyBilling = {
+  plan_id: 2,
+  billing_status: 'Active',
+  current_period_start: '2025-07-01',
+  current_period_end: '2025-07-31',
+  usage: {
+    skus_used: 800,
+    users_used: 20,
+    reports_generated: 30,
+  },
 }
 
-interface UseBillingOptions {
-  companyId: string
-  useMock?: boolean
-}
+export function useBilling({ useMock = false } = {}) {
+  const supabase = useSupabaseClient()
+  const user = useSupabaseUser()
 
-type UseBillingReturn = {
-  billing: ShallowRef<BillingInfo | null>
-  error: Ref<Error | null>
-  loading: Ref<boolean>
-  refetch: () => Promise<void>
-}
-
-// Mock data
-const mockBilling: BillingInfo = {
-  id: 'bill1',
-  company_id: 'mock-company',
-  plan: 'pro',
-  status: 'active',
-  next_invoice_date: '2025-08-01',
-  amount_due: 99,
-  last_payment_date: '2025-07-01',
-  last_payment_amount: 99,
-  payment_method: 'credit_card',
-  billing_email: 'billing@mock-company.com',
-  created_at: '2025-06-01T10:00:00Z',
-  updated_at: '2025-07-01T10:00:00Z',
-}
-
-// Simple in-memory cache by companyId
-const billingCache = new Map<string, BillingInfo>()
-
-export function useBilling(
-  supabase: SupabaseClient,
-  options: UseBillingOptions
-): UseBillingReturn {
-  const billing = shallowRef<BillingInfo | null>(null)
-  const error = ref<Error | null>(null)
+  const billingPlans = ref<any[]>([])
+  const companyBilling = ref<any>(null)
   const loading = ref(false)
+  const error = ref<string | null>(null)
 
-  // Should we use mock data? True if explicitly requested or in development mode
-  const useMock = computed(() => options.useMock || process.env.NODE_ENV === 'development')
+  // Helper: get company_id for current user (customize as needed)
+  async function getCompanyId() {
+    if (!user.value) return null
+    const { data, error } = await supabase
+      .from('user_companies')
+      .select('company_id')
+      .eq('user_id', user.value.id)
+      .single()
+    return data?.company_id || null
+  }
 
-  async function fetchData() {
-    // On server, skip fetching unless using mock data
-    if (!isClient && !useMock.value) return
+  async function fetchBillingData() {
+    if (useMock) {
+      billingPlans.value = mockBillingPlans
+      companyBilling.value = mockCompanyBilling
+      return
+    }
     loading.value = true
     error.value = null
-
-    // Use cache if available and not using mock data
-    if (!useMock.value && billingCache.has(options.companyId)) {
-      billing.value = billingCache.get(options.companyId)!
-      loading.value = false
-      return
-    }
-
-    // Use mock data if requested or in dev mode
-    if (useMock.value) {
-      billing.value = mockBilling
-      loading.value = false
-      return
-    }
-
-    let billData, billErr
     try {
-      const { data, error: err } = await supabase
+      // 1. Fetch billing plans
+      const { data: plans, error: plansError } = await supabase
+        .from('billing_plans')
+        .select('*')
+      if (plansError) throw plansError
+      billingPlans.value = plans || []
+
+      // 2. Fetch company billing for current user
+      const companyId = await getCompanyId()
+      if (!companyId) throw new Error('No company found for user')
+      const { data: billing, error: billingError } = await supabase
         .from('company_billing')
         .select('*')
-        .eq('company_id', options.companyId)
+        .eq('company_id', companyId)
         .single()
-      if (err) throw err
-      billData = data
-      billing.value = billData || null
-      if (billData) billingCache.set(options.companyId, billData)
-    } catch (err: any) {
-      error.value = err
+      if (billingError) throw billingError
+      companyBilling.value = billing
+    } catch (e: any) {
+      error.value = e.message || 'Failed to fetch billing data'
+      // Fallback to mock data if desired
+      billingPlans.value = mockBillingPlans
+      companyBilling.value = mockCompanyBilling
+    } finally {
       loading.value = false
-      return
     }
-    loading.value = false
   }
 
-  watch(() => options.companyId, () => {
-    fetchData()
-  }, { immediate: true })
+  onMounted(fetchBillingData)
 
-  if (isClient) {
-    onMounted(() => {
-      fetchData()
-    })
-  }
+  // Computed: always fallback to mock if live data is empty
+  const billingPlansToShow = computed(() =>
+    billingPlans.value.length ? billingPlans.value : mockBillingPlans
+  )
+  const companyBillingToShow = computed(() =>
+    companyBilling.value ? companyBilling.value : mockCompanyBilling
+  )
 
   return {
-    billing,
-    error,
+    billingPlans: billingPlansToShow,
+    companyBilling: companyBillingToShow,
     loading,
-    refetch: fetchData,
+    error,
+    refresh: fetchBillingData
   }
 }
