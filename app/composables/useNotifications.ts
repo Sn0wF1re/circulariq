@@ -1,145 +1,79 @@
-// Composable: useNotifications
-// Fetches notifications for a user or company
-// Usage: const { notifications, error, loading, refetch } = useNotifications(supabase, { companyId, userId, useMock })
+import { ref, computed, onMounted } from 'vue'
+// composables are auto-imported in Nuxt
 
-import { ref, computed, watch, shallowRef, onMounted } from 'vue'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Ref, ShallowRef } from 'vue'
-
-const isClient = typeof window !== 'undefined'
-
-interface Notification {
-  id: string
-  company_id: string
-  user_id: string
-  type: string
-  message: string
-  read: boolean
-  created_at: string
-  updated_at: string
-  severity: string
-  link: string
-  context: any
-}
-
-interface UseNotificationsOptions {
-  companyId?: string
-  userId?: string
-  useMock?: boolean
-}
-
-type UseNotificationsReturn = {
-  notifications: ShallowRef<Notification[]>
-  error: Ref<Error | null>
-  loading: Ref<boolean>
-  refetch: () => Promise<void>
-}
-
-// Mock data
-const mockNotifications: Notification[] = [
+// ---- 1. Mock Data ----
+const mockNotifications = [
   {
-    id: 'n1',
-    company_id: 'mock-company',
-    user_id: 'user1',
-    type: 'info',
-    message: 'Welcome to CircularIQ!',
-    read: false,
-    created_at: '2025-07-01T10:00:00Z',
-    updated_at: '2025-07-01T10:05:00Z',
-    severity: 'info',
-    link: '',
-    context: null,
+    title: 'New EU Regulation Update',
+    description: 'Extended Producer Responsibility regulations have been updated for Q2 2024',
+    time: '2 hours ago',
+    bg: 'bg-blue-50',
+    dot: 'bg-blue-500',
   },
   {
-    id: 'n2',
-    company_id: 'mock-company',
-    user_id: 'user2',
-    type: 'alert',
-    message: 'Your report is ready.',
-    read: true,
-    created_at: '2025-07-02T12:00:00Z',
-    updated_at: '2025-07-02T12:05:00Z',
-    severity: 'warning',
-    link: '/reports',
-    context: { reportId: 'r1' },
+    title: 'Compliance Score Improved',
+    description: 'Your overall compliance score has increased to 87% (+2%)',
+    time: '1 day ago',
+    bg: 'bg-green-50',
+    dot: 'bg-green-500',
+  },
+  {
+    title: 'Report Generation Complete',
+    description: 'Your Q1 2024 sustainability report is ready for download',
+    time: '2 days ago',
+    bg: 'bg-yellow-50',
+    dot: 'bg-yellow-500',
+  },
+  {
+    title: 'Action Required',
+    description: 'Product BFC-002 requires updated recycling data to maintain compliance',
+    time: '3 days ago',
+    bg: 'bg-red-50',
+    dot: 'bg-red-500',
+    action: 'View',
   },
 ]
 
-// Simple in-memory cache by companyId+userId
-const notificationsCache = new Map<string, Notification[]>()
+export function useNotifications({ useMock = false } = {}) {
+  const supabase = useSupabaseClient()
+  const user = useSupabaseUser()
 
-export function useNotifications(
-  supabase: SupabaseClient,
-  options: UseNotificationsOptions
-): UseNotificationsReturn {
-  const notifications = shallowRef<Notification[]>([])
-  const error = ref<Error | null>(null)
+  const notifications = ref<any[]>([])
   const loading = ref(false)
+  const error = ref<string | null>(null)
 
-  // Should we use mock data? True if explicitly requested or in development mode
-  const useMock = computed(() => options.useMock || process.env.NODE_ENV === 'development')
-
-  function cacheKey() {
-    return (options.companyId || '') + ':' + (options.userId || '')
-  }
-
-  async function fetchData() {
-    // On server, skip fetching unless using mock data
-    if (!isClient && !useMock.value) return
+  async function fetchNotifications() {
+    if (useMock) {
+      notifications.value = mockNotifications
+      return
+    }
     loading.value = true
     error.value = null
-
-    // Use cache if available and not using mock data
-    if (!useMock.value && notificationsCache.has(cacheKey())) {
-      notifications.value = notificationsCache.get(cacheKey())!
-      loading.value = false
-      return
-    }
-
-    // Use mock data if requested or in dev mode
-    if (useMock.value) {
-      notifications.value = mockNotifications
-      loading.value = false
-      return
-    }
-
-    let notifData, notifErr
     try {
-      let query = supabase
+      // Example: fetch notifications for the current user
+      const { data, error: notifError } = await supabase
         .from('notifications')
         .select('*')
-      if (options.companyId) {
-        query = query.eq('company_id', options.companyId)
-      }
-      if (options.userId) {
-        query = query.eq('user_id', options.userId)
-      }
-      ({ data: notifData, error: notifErr } = await query)
-      if (notifErr) throw notifErr
-      notifications.value = notifData || []
-      notificationsCache.set(cacheKey(), notifications.value)
-    } catch (err: any) {
-      error.value = err
+        .eq('user_id', user.value?.id)
+        .order('created_at', { ascending: false })
+      if (notifError) throw notifError
+      notifications.value = data || []
+    } catch (e: any) {
+      error.value = e.message || 'Failed to fetch notifications'
+      notifications.value = mockNotifications
+    } finally {
       loading.value = false
-      return
     }
-    loading.value = false
   }
 
-  watch(() => [options.companyId, options.userId], () => {
-    fetchData()
-  }, { immediate: true })
+  onMounted(fetchNotifications)
 
-  if (isClient) {
-    onMounted(() => {
-      fetchData()
-    })
-  }
+  const notificationsToShow = computed(() => notifications.value.length ? notifications.value : mockNotifications)
 
   return {
-    notifications,
-    error,
+    notifications: notificationsToShow,
     loading,
-    refetch: fetchData,
+    error,
+    refresh: fetchNotifications
   }
 }
