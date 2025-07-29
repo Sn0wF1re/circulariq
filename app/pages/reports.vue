@@ -70,32 +70,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import { Download, FileText } from 'lucide-vue-next'
-
-const products = ref([
-  { id: '1', name: 'Eco Water Bottle' },
-  { id: '2', name: 'Biodegradable Food Container' }
-])
-
-const reports = ref([
-  {
-    id: '1',
-    product_id: '1',
-    reporting_period: '2024-Q1',
-    total_plastic_kg: 1250,
-    emissions_co2e: 3.2,
-    footprint_score: 78
-  },
-  {
-    id: '2',
-    product_id: '2',
-    reporting_period: '2024-Q2',
-    total_plastic_kg: 890,
-    emissions_co2e: 2.1,
-    footprint_score: 82
-  }
-])
+const { reports, loading, error, refresh } = useReports()
+const { products } = useProducts()
 
 function getProductName(productId) {
   const product = products.value.find(p => p.id === productId)
