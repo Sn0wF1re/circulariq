@@ -57,7 +57,7 @@
           <IconUsers class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">{{ users.length }}</div>
+          <div class="text-2xl font-bold">{{ team.length }}</div>
           <p class="text-xs text-muted-foreground">
             {{ activeUsers }} active, {{ pendingUsers }} pending
           </p>
