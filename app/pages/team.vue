@@ -1,12 +1,3 @@
-<script setup lang="ts">
-import { useSupabaseClient } from '#imports'
-import { useTeam } from '~/app/composables/useTeam'
-
-const supabase = useSupabaseClient()
-const companyId = 'company-1' // TODO: Replace with actual logic
-
-const { team, error, loading, refetch } = useTeam(supabase, { companyId })
-</script>
 <template>
   <div class="space-y-6 p-6">
     <div class="flex justify-between items-center">
@@ -197,28 +188,21 @@ const { team, error, loading, refetch } = useTeam(supabase, { companyId })
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { UserPlus as IconUserPlus, Mail as IconMail, Users as IconUsers, Shield as IconShield, Search as IconSearch, Filter as IconFilter, MoreVertical as IconMoreVertical } from 'lucide-vue-next'
-
-// Mock users data
-const users = ref([
-  { id: '1', name: 'John Smith', email: 'john.smith@ecotech.com', role: 'Admin', status: 'Active', last_login: '2025-07-22 09:15' },
-  { id: '2', name: 'Jane Doe', email: 'jane.doe@ecotech.com', role: 'Manager', status: 'Active', last_login: '2025-07-22 08:45' },
-  { id: '3', name: 'Emily Green', email: 'emily.green@ecotech.com', role: 'Viewer', status: 'Pending', last_login: '-' },
-  { id: '4', name: 'Michael Brown', email: 'michael.brown@ecotech.com', role: 'Manager', status: 'Active', last_login: '2025-07-21 17:30' },
-])
+const { team, loading, error, refresh, updateTeamMember } = useTeam({ useMock: false })
 
 const searchTerm = ref('')
 
 const filteredUsers = computed(() => {
-  if (!searchTerm.value) return users.value
-  return users.value.filter(u =>
+  if (!searchTerm.value) return team.value
+  return team.value.filter(u =>
     u.name.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
     u.email.toLowerCase().includes(searchTerm.value.toLowerCase())
   )
 })
 
-const activeUsers = computed(() => users.value.filter(u => u.status === 'Active').length)
-const pendingUsers = computed(() => users.value.filter(u => u.status === 'Pending').length)
-const adminUsers = computed(() => users.value.filter(u => u.role === 'Admin').length)
+const activeUsers = computed(() => team.value.filter(u => u.status === 'Active').length)
+const pendingUsers = computed(() => team.value.filter(u => u.status === 'Pending').length)
+const adminUsers = computed(() => team.value.filter(u => u.role === 'Admin').length)
 
 function getRoleColor(role: string) {
   if (role === 'Admin') return 'bg-green-100 text-green-800'
