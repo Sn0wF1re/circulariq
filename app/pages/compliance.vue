@@ -45,35 +45,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import { CheckCircle, AlertTriangle } from 'lucide-vue-next'
-
-const companies = ref([
-  {
-    id: '1',
-    name: 'EcoTech Solutions',
-    sector: 'Technology',
-    region: 'North America',
-    compliance_status: {
-      overall_score: 85,
-      regulations_met: 17,
-      total_regulations: 20
-    },
-    regulation_profile: 'EU-US-CA'
-  },
-  {
-    id: '2',
-    name: 'GreenPack Industries',
-    sector: 'Packaging',
-    region: 'Europe',
-    compliance_status: {
-      overall_score: 92,
-      regulations_met: 18,
-      total_regulations: 20
-    },
-    regulation_profile: 'EU-UK'
-  }
-])
+const { companies, loading, error, refresh } = useCompliance()
 
 function getComplianceColor(score) {
   if (score >= 90) return 'bg-green-100 text-green-800'

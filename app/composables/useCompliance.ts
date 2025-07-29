@@ -1,108 +1,72 @@
-// Composable: useCompliance
-// Fetches company compliance data
-// Usage: const { compliance, error, loading, refetch } = useCompliance(supabase, { companyId, useMock })
+import { ref, computed, onMounted } from 'vue'
+// composables are auto-imported in Nuxt
 
-import { ref, computed, watch, shallowRef, onMounted } from 'vue'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Ref, ShallowRef } from 'vue'
+// ---- 1. Mock Data (matches companies schema) ----
+const mockCompanies = [
+  {
+    id: '1',
+    name: 'EcoTech Solutions',
+    sector: 'Technology',
+    region: 'North America',
+    compliance_status: {
+      overall_score: 85,
+      regulations_met: 17,
+      total_regulations: 20
+    },
+    regulation_profile: 'EU-US-CA',
+  },
+  {
+    id: '2',
+    name: 'GreenPack Industries',
+    sector: 'Packaging',
+    region: 'Europe',
+    compliance_status: {
+      overall_score: 92,
+      regulations_met: 18,
+      total_regulations: 20
+    },
+    regulation_profile: 'EU-UK',
+  }
+]
 
-const isClient = typeof window !== 'undefined'
+export function useCompliance({ useMock = false } = {}) {
+  const supabase = useSupabaseClient()
+  const user = useSupabaseUser()
 
-interface Compliance {
-  id: string
-  name: string
-  sector: string
-  region: string
-  compliance_status: any
-  regulation_profile: string
-  // ...other fields
-}
-
-interface UseComplianceOptions {
-  companyId: string
-  useMock?: boolean
-}
-
-type UseComplianceReturn = {
-  compliance: ShallowRef<Compliance | null>
-  error: Ref<Error | null>
-  loading: Ref<boolean>
-  refetch: () => Promise<void>
-}
-
-// Mock data
-const mockCompliance: Compliance = {
-  id: 'mock-company',
-  name: 'Mock Company',
-  sector: 'Packaging',
-  region: 'EU',
-  compliance_status: { score: 87, issues: [] },
-  regulation_profile: 'EU-2025',
-}
-
-// Simple in-memory cache by companyId
-const complianceCache = new Map<string, Compliance>()
-
-export function useCompliance(
-  supabase: SupabaseClient,
-  options: UseComplianceOptions
-): UseComplianceReturn {
-  const compliance = shallowRef<Compliance | null>(null)
-  const error = ref<Error | null>(null)
+  const companies = ref<any[]>([])
   const loading = ref(false)
+  const error = ref<string | null>(null)
 
-  const useMock = computed(() => options.useMock || process.env.NODE_ENV === 'development')
-
-  async function fetchData() {
-    if (!isClient && !useMock.value) return // SSR: skip on server unless using mock
+  async function fetchCompanies() {
+    if (useMock) {
+      companies.value = mockCompanies
+      return
+    }
     loading.value = true
     error.value = null
-
-    // Caching
-    if (!useMock.value && complianceCache.has(options.companyId)) {
-      compliance.value = complianceCache.get(options.companyId)!
-      loading.value = false
-      return
-    }
-
-    if (useMock.value) {
-      compliance.value = mockCompliance
-      loading.value = false
-      return
-    }
-
-    let companyData, companyErr
     try {
-      ({ data: companyData, error: companyErr } = await supabase
+      // Get all companies for the user (could be filtered by user)
+      const { data, error: companiesError } = await supabase
         .from('companies')
-        .select('*')
-        .eq('id', options.companyId)
-        .single())
-      if (companyErr) throw companyErr
-      compliance.value = companyData
-      complianceCache.set(options.companyId, companyData)
-    } catch (err: any) {
-      error.value = err
+        .select('id, name, sector, region, compliance_status, regulation_profile')
+      if (companiesError) throw companiesError
+      companies.value = data || []
+    } catch (e: any) {
+      error.value = e.message || 'Failed to fetch companies'
+      companies.value = mockCompanies
+    } finally {
       loading.value = false
-      return
     }
-    loading.value = false
   }
 
-  watch(() => options.companyId, () => {
-    fetchData()
-  }, { immediate: true })
+  onMounted(fetchCompanies)
 
-  if (isClient) {
-    onMounted(() => {
-      fetchData()
-    })
-  }
+  const companiesToShow = computed(() => companies.value.length ? companies.value : mockCompanies)
 
   return {
-    compliance,
-    error,
+    companies: companiesToShow,
     loading,
-    refetch: fetchData,
+    error,
+    refresh: fetchCompanies
   }
 }
