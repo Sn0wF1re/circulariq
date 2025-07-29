@@ -1,3 +1,12 @@
+<script setup lang="ts">
+import { useSupabaseClient } from '#imports'
+import { useSettings } from '~/app/composables/useSettings'
+
+const supabase = useSupabaseClient()
+const companyId = 'company-1' // TODO: Replace with actual logic
+
+const { settings, error, loading, refetch, updateSettings } = useSettings(supabase, { companyId })
+</script>
 <template>
   <div class="space-y-6 p-6">
     <div>

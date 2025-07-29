@@ -1,3 +1,13 @@
+<script setup lang="ts">
+import { useSupabaseClient } from '#imports'
+import { useNotifications } from '~/app/composables/useNotifications'
+
+const supabase = useSupabaseClient()
+const companyId = 'company-1' // TODO: Replace with actual logic
+const userId = 'user-1' // TODO: Replace with actual logic
+
+const { notifications, error, loading, refetch } = useNotifications(supabase, { companyId, userId })
+</script>
 <template>
   <div class="space-y-6 p-6">
     <div>

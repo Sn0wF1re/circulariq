@@ -1,3 +1,19 @@
+<script setup lang="ts">
+import { useSupabaseClient } from '#imports'
+import { useKpi } from '~/app/composables/useKpi'
+import { useDashboardData } from '~/app/composables/useDashboardData'
+import { ref, watch } from 'vue'
+
+const supabase = useSupabaseClient()
+const selectedCompany = ref('company-1') // TODO: Replace with actual logic
+
+const { kpi, error: kpiError, loading: kpiLoading, refetch: refetchKpi } = useKpi(supabase, { companyId: selectedCompany.value })
+const { companies, loading: companiesLoading } = useDashboardData(supabase, { companyId: selectedCompany.value })
+
+watch(selectedCompany, () => {
+  refetchKpi()
+})
+</script>
 <template>
   <div>
     <!-- Company Selector -->

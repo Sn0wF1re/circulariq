@@ -1,3 +1,12 @@
+<script setup lang="ts">
+import { useSupabaseClient } from '#imports'
+import { useBilling } from '~/app/composables/useBilling'
+
+const supabase = useSupabaseClient()
+const companyId = 'company-1' // TODO: Replace with actual logic
+
+const { billing, error, loading, refetch } = useBilling(supabase, { companyId })
+</script>
 <template>
   <div class="space-y-6 p-6">
     <div>

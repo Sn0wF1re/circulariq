@@ -1,3 +1,12 @@
+<script setup lang="ts">
+import { useSupabaseClient } from '#imports'
+import { useTeam } from '~/app/composables/useTeam'
+
+const supabase = useSupabaseClient()
+const companyId = 'company-1' // TODO: Replace with actual logic
+
+const { team, error, loading, refetch } = useTeam(supabase, { companyId })
+</script>
 <template>
   <div class="space-y-6 p-6">
     <div class="flex justify-between items-center">
