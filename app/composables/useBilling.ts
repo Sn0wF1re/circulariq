@@ -1,5 +1,4 @@
 import { ref, computed, onMounted } from 'vue'
-import { useSupabaseClient, useSupabaseUser } from '#imports'
 
 // ---- 1. Mock Data (from billing page) ----
 const mockBillingPlans = [
