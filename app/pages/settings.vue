@@ -157,24 +157,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
-const { company, loading, error, refresh } = useCompanies()
+import { computed } from 'vue'
+const { settings, loading, error, refresh, updateSettings } = useSettings({ useMock: false })
 
 // v-models for company fields (matching schema)
-const companyName = ref('')
-const sector = ref('')
-const region = ref('')
-const regulationProfile = ref('')
-const complianceStatus = ref('')
-
-// Watch for company data and update v-models
-watchEffect(() => {
-  if (company.value) {
-    companyName.value = company.value.name || ''
-    sector.value = company.value.sector || ''
-    region.value = company.value.region || ''
-    regulationProfile.value = company.value.regulation_profile || ''
-    complianceStatus.value = (typeof company.value.compliance_status === 'object' ? company.value.compliance_status.status : company.value.compliance_status) || ''
-  }
+const companyName = computed({
+  get: () => settings.value?.company?.name || '',
+  set: v => updateSettings({ company: { ...settings.value.company, name: v } })
+})
+const sector = computed({
+  get: () => settings.value?.company?.sector || '',
+  set: v => updateSettings({ company: { ...settings.value.company, sector: v } })
+})
+const region = computed({
+  get: () => settings.value?.company?.region || '',
+  set: v => updateSettings({ company: { ...settings.value.company, region: v } })
+})
+const regulationProfile = computed({
+  get: () => settings.value?.company?.regulation_profile || '',
+  set: v => updateSettings({ company: { ...settings.value.company, regulation_profile: v } })
+})
+const complianceStatus = computed({
+  get: () => settings.value?.company?.compliance_status || '',
+  set: v => updateSettings({ company: { ...settings.value.company, compliance_status: v } })
 })
 </script>

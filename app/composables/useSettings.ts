@@ -1,135 +1,92 @@
-// Composable: useSettings
-// Fetches and updates settings for a company
-// Usage: const { settings, error, loading, refetch, updateSettings } = useSettings(supabase, { companyId, useMock })
+import { ref } from 'vue'
 
-import { ref, computed, watch, shallowRef, onMounted } from 'vue'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Ref, ShallowRef } from 'vue'
-
-const isClient = typeof window !== 'undefined'
-
-interface CompanySettings {
-  id: string
-  company_id: string
-  notifications_enabled: boolean
-  theme: string
-  language: string
-  timezone: string
-  logo_url: string
-  created_at: string
-  updated_at: string
+// ---- 1. Mock Data ----
+const mockSettings = {
+  company: {
+    name: 'EcoTech Solutions',
+    sector: 'Technology',
+    region: 'North America',
+    regulation_profile: 'EU Packaging',
+    compliance_status: 'Compliant',
+  },
+  account: {
+    full_name: 'John Smith',
+    email: 'john.smith@ecotech.com',
+    phone: '+1 (555) 123-4567',
+    timezone: 'utc',
+  },
+  privacy: {
+    analytics: true,
+    marketing: false,
+  },
+  api: {
+    key: 'pk_test_51J...',
+    connected_apps: [
+      { name: 'Salesforce', status: 'connected' },
+      { name: 'SAP', status: 'disconnected' },
+    ],
+  },
 }
 
-interface UseSettingsOptions {
-  companyId: string
-  useMock?: boolean
-}
-
-type UseSettingsReturn = {
-  settings: ShallowRef<CompanySettings | null>
-  error: Ref<Error | null>
-  loading: Ref<boolean>
-  refetch: () => Promise<void>
-  updateSettings: (patch: Partial<CompanySettings>) => Promise<void>
-}
-
-// Mock data
-const mockSettings: CompanySettings = {
-  id: 'settings1',
-  company_id: 'mock-company',
-  notifications_enabled: true,
-  theme: 'light',
-  language: 'en',
-  timezone: 'UTC',
-  logo_url: 'https://mock-company.com/logo.png',
-  created_at: '2025-06-01T10:00:00Z',
-  updated_at: '2025-07-01T10:00:00Z',
-}
-
-// Simple in-memory cache by companyId
-const settingsCache = new Map<string, CompanySettings>()
-
-export function useSettings(
-  supabase: SupabaseClient,
-  options: UseSettingsOptions
-): UseSettingsReturn {
-  const settings = shallowRef<CompanySettings | null>(null)
-  const error = ref<Error | null>(null)
+export function useSettings({ useMock = false, companyId = null } = {}) {
+  const supabase = useSupabaseClient()
+  const settings = ref<any>(null)
   const loading = ref(false)
+  const error = ref<string | null>(null)
 
-  // Should we use mock data? True if explicitly requested or in development mode
-  const useMock = computed(() => options.useMock || process.env.NODE_ENV === 'development')
-
-  async function fetchData() {
-    // On server, skip fetching unless using mock data
-    if (!isClient && !useMock.value) return
+  async function fetchSettings() {
+    if (useMock) {
+      settings.value = mockSettings
+      return
+    }
     loading.value = true
     error.value = null
-
-    // Use cache if available and not using mock data
-    if (!useMock.value && settingsCache.has(options.companyId)) {
-      settings.value = settingsCache.get(options.companyId)!
-      loading.value = false
-      return
-    }
-
-    // Use mock data if requested or in dev mode
-    if (useMock.value) {
-      settings.value = mockSettings
-      loading.value = false
-      return
-    }
-
-    let settingsData, settingsErr
     try {
-      const { data, error: err } = await supabase
+      // Example: fetch company settings from Supabase
+      const { data, error: settingsError } = await supabase
         .from('company_settings')
         .select('*')
-        .eq('company_id', options.companyId)
+        .eq('company_id', companyId)
         .single()
-      if (err) throw err
-      settingsData = data
-      settings.value = settingsData || null
-      if (settingsData) settingsCache.set(options.companyId, settingsData)
-    } catch (err: any) {
-      error.value = err
+      if (settingsError) throw settingsError
+      settings.value = data || mockSettings
+    } catch (e: any) {
+      error.value = e.message || 'Failed to fetch settings.'
+      settings.value = mockSettings
+    } finally {
       loading.value = false
-      return
     }
-    loading.value = false
   }
 
-  async function updateSettings(patch: Partial<CompanySettings>) {
+  async function updateSettings(patch: any) {
     loading.value = true
     error.value = null
     try {
-      const { error: err } = await supabase
+      if (useMock) {
+        settings.value = { ...settings.value, ...patch }
+        return
+      }
+      const { error: updateError } = await supabase
         .from('company_settings')
         .update(patch)
-        .eq('company_id', options.companyId)
-      if (err) throw err
-      await fetchData()
-    } catch (err: any) {
-      error.value = err
+        .eq('company_id', companyId)
+      if (updateError) throw updateError
+      await fetchSettings()
+    } catch (e: any) {
+      error.value = e.message || 'Failed to update settings.'
+    } finally {
+      loading.value = false
     }
-    loading.value = false
   }
 
-  watch(() => options.companyId, () => {
-    fetchData()
-  }, { immediate: true })
-
-  if (isClient) {
-    onMounted(() => {
-      fetchData()
-    })
-  }
+  // Optionally, fetch on composable use
+  fetchSettings()
 
   return {
     settings,
-    error,
     loading,
-    refetch: fetchData,
+    error,
+    refresh: fetchSettings,
     updateSettings,
   }
 }
