@@ -120,29 +120,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Plus, Search, Filter, Package, Eye } from 'lucide-vue-next'
-
-const products = ref([
-  {
-    id: '1',
-    name: 'Eco Water Bottle',
-    sku_code: 'EWB-001',
-    material: 'rPET',
-    weight_grams: 25,
-    recycled_pct: 75,
-    recyclability_pct: 95,
-    reuse_pct: 85
-  },
-  {
-    id: '2',
-    name: 'Biodegradable Food Container',
-    sku_code: 'BFC-002',
-    material: 'PLA',
-    weight_grams: 45,
-    recycled_pct: 0,
-    recyclability_pct: 60,
-    reuse_pct: 40
-  }
-])
+const { products, addProduct, loading, error, refresh } = useProducts()
 
 const showAddDialog = ref(false)
 const newProduct = ref({
@@ -155,11 +133,8 @@ const newProduct = ref({
   reuse_pct: 0
 })
 
-function addProduct() {
-  products.value.push({
-    id: String(Date.now()),
-    ...newProduct.value
-  })
+async function handleAddProduct() {
+  await addProduct({ ...newProduct.value })
   showAddDialog.value = false
   newProduct.value = {
     name: '',
