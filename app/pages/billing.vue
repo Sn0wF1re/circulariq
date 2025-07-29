@@ -1,12 +1,3 @@
-<script setup lang="ts">
-import { useSupabaseClient } from '#imports'
-import { useBilling } from '~/app/composables/useBilling'
-
-const supabase = useSupabaseClient()
-const companyId = 'company-1' // TODO: Replace with actual logic
-
-const { billing, error, loading, refetch } = useBilling(supabase, { companyId })
-</script>
 <template>
   <div class="space-y-6 p-6">
     <div>
@@ -185,53 +176,12 @@ const { billing, error, loading, refetch } = useBilling(supabase, { companyId })
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+
 import { CheckCircle as IconCheckCircle, AlertTriangle as IconAlertTriangle } from 'lucide-vue-next'
 
-// Mock data (replace with composables or API calls)
-const billingPlans = ref([
-  {
-    id: 1,
-    name: 'Starter',
-    monthly_price: 49,
-    sku_limit: 100,
-    user_limit: 5,
-    report_limit: 10,
-    features: ['Basic analytics', 'Email support', 'Up to 5 users'],
-  },
-  {
-    id: 2,
-    name: 'Growth',
-    monthly_price: 149,
-    sku_limit: 1000,
-    user_limit: 25,
-    report_limit: 50,
-    features: ['Advanced analytics', 'Priority support', 'Up to 25 users', 'Custom branding'],
-  },
-  {
-    id: 3,
-    name: 'Enterprise',
-    monthly_price: 499,
-    sku_limit: 10000,
-    user_limit: 100,
-    report_limit: 200,
-    features: ['All features', 'Dedicated manager', 'Unlimited users', 'API access'],
-  },
-])
-
-const companyBilling = ref({
-  plan_id: 2,
-  billing_status: 'Active',
-  current_period_start: '2025-07-01',
-  current_period_end: '2025-07-31',
-  usage: {
-    skus_used: 800,
-    users_used: 20,
-    reports_generated: 30,
-  },
-})
-
+const { billingPlans, companyBilling, loading, error, refresh } = useBilling()
 const currentPlan = computed(() => billingPlans.value.find(p => p.id === companyBilling.value.plan_id))
+
 
 function getBillingStatusColor(status: string) {
   if (status === 'Active') return 'bg-green-100 text-green-800'
@@ -240,12 +190,14 @@ function getBillingStatusColor(status: string) {
   return 'bg-gray-100 text-gray-800'
 }
 
+
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString()
 }
 
+
 const usageAlerts = computed(() => {
-  const alerts = []
+  const alerts: { message: string }[] = []
   if (!currentPlan.value) return alerts
   const skuUsage = (companyBilling.value.usage.skus_used / currentPlan.value.sku_limit) * 100
   const userUsage = (companyBilling.value.usage.users_used / currentPlan.value.user_limit) * 100
