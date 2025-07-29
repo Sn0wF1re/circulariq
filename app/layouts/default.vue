@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center space-x-3">
-            <div class="flex items-center justify-center w-10 h-10 bg-[#28A745] rounded-lg">
+            <div class="flex items-center justify-center w-12 h-12 rounded-lg">   <!---  bg-[#28A745] -->
               <img src="/logo.png" alt="CircularIQ Logo" class="w-6 h-6" />
             </div>
             <div>
