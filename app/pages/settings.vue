@@ -14,10 +14,10 @@
         </CardHeader>
         <CardContent class="space-y-4">
           <div v-if="isAdminOrOwner">
-            <div class="flex flex-col md:flex-row md:items-center gap-4">
-              <div>
-                <Label>Current Company</Label>
-                <Select v-model="activeCompanyId" class="min-w-[220px]">
+            <div class="flex flex-col md:flex-row md:items-end gap-4">
+              <div class="flex flex-col gap-1 flex-1 min-w-[220px]">
+                <Label class="mb-1">Current Company</Label>
+                <Select v-model="activeCompanyId">
                   <SelectTrigger>
                     <SelectValue :placeholder="activeCompany?.name || 'Select company'" />
                   </SelectTrigger>
@@ -26,7 +26,7 @@
                   </SelectContent>
                 </Select>
               </div>
-              <Button @click="showAddCompany = true" class="bg-[#28A745] hover:bg-[#14532D]">Add Company</Button>
+              <Button @click="showAddCompany = true" class="bg-[#28A745] hover:bg-[#14532D] h-10 md:mb-0 md:ml-2">Add Company</Button>
             </div>
             <div v-if="activeCompany">
               <p class="mt-2 text-sm text-gray-600">Sector: {{ activeCompany.sector }} | Region: {{ activeCompany.region }}</p>
