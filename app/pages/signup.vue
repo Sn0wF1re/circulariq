@@ -1,0 +1,96 @@
+<template>
+  <div class="min-h-screen flex items-center justify-center bg-[#EFFBF0]">
+    <Card class="w-full max-w-lg min-w-[350px] p-8 shadow-lg bg-white rounded-xl">
+      <CardHeader class="mb-6 text-center">
+        <IconUserPlus class="mx-auto w-10 h-10 text-[#28A745] mb-2" />
+        <CardTitle class="text-2xl font-bold">Sign Up</CardTitle>
+        <CardDescription class="text-gray-600">Create your CircularIQ account</CardDescription>
+      </CardHeader>
+      <form @submit.prevent="onSignup" class="space-y-5">
+        <div class="flex gap-3">
+          <div class="flex-1 flex flex-col gap-1">
+            <Label for="first">First Name</Label>
+            <Input id="first" v-model="first" type="text" placeholder="Jane" required />
+          </div>
+          <div class="flex-1 flex flex-col gap-1">
+            <Label for="last">Last Name</Label>
+            <Input id="last" v-model="last" type="text" placeholder="Doe" required />
+          </div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <Label for="email">Email</Label>
+          <Input id="email" v-model="email" type="email" placeholder="you@email.com" required autofocus />
+        </div>
+        <div class="flex flex-col gap-1">
+          <Label for="password">Password</Label>
+          <Input id="password" v-model="password" type="password" placeholder="••••••••" required />
+        </div>
+        <div class="flex flex-col gap-1">
+          <Label for="confirm">Confirm Password</Label>
+          <Input id="confirm" v-model="confirm" type="password" placeholder="••••••••" required />
+        </div>
+        <Button :disabled="loading" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white font-semibold py-2 rounded">
+          <span v-if="loading"><IconLoader class="animate-spin w-4 h-4 inline mr-2" /></span>
+          Sign Up
+        </Button>
+        <div v-if="error" class="text-red-600 text-sm text-center">{{ error }}</div>
+      </form>
+      <div class="mt-6 text-center text-sm text-gray-600">
+        Already have an account?
+        <NuxtLink to="/login" class="text-[#28A745] hover:underline font-medium">Sign in</NuxtLink>
+      </div>
+    </Card>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { UserPlus as IconUserPlus, Loader as IconLoader } from 'lucide-vue-next'
+
+definePageMeta({ layout: 'blank' })
+
+const first = ref('')
+const last = ref('')
+const email = ref('')
+const password = ref('')
+const confirm = ref('')
+const loading = ref(false)
+const error = ref('')
+const router = useRouter()
+const supabase = useSupabaseClient()
+
+async function onSignup() {
+  if (password.value !== confirm.value) {
+    error.value = 'Passwords do not match.'
+    return
+  }
+  loading.value = true
+  error.value = ''
+  const { data, error: signUpError } = await supabase.auth.signUp({
+    email: email.value,
+    password: password.value,
+    options: {
+      data: {
+        first_name: first.value,
+        last_name: last.value,
+        display_name: `${first.value} ${last.value}`,
+      },
+    },
+  })
+  loading.value = false
+  if (signUpError) {
+    error.value = signUpError.message || 'Sign up failed.'
+    return
+  }
+  // Optionally, insert into users table if needed
+  router.push('/onboarding')
+}
+</script>
+
+<style scoped>
+input:focus {
+  outline: 2px solid #28A745;
+  outline-offset: 2px;
+}
+</style>

@@ -6,6 +6,61 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Company Management Section -->
+      <Card class="lg:col-span-2">
+        <CardHeader>
+          <CardTitle>Company Management</CardTitle>
+          <CardDescription>Manage your company memberships and create new organizations</CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-4">
+          <div v-if="isAdminOrOwner">
+            <div class="flex flex-col md:flex-row md:items-center gap-4">
+              <div>
+                <Label>Current Company</Label>
+                <Select v-model="activeCompanyId" class="min-w-[220px]">
+                  <SelectTrigger>
+                    <SelectValue :placeholder="activeCompany?.name || 'Select company'" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem v-for="c in companies" :key="c.id" :value="c.id">{{ c.name }}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button @click="showAddCompany = true" class="bg-[#28A745] hover:bg-[#14532D]">Add Company</Button>
+            </div>
+            <div v-if="activeCompany">
+              <p class="mt-2 text-sm text-gray-600">Sector: {{ activeCompany.sector }} | Region: {{ activeCompany.region }}</p>
+              <p class="text-sm text-gray-600">Compliance: {{ activeCompany.compliance_status?.status || activeCompany.compliance_status }}</p>
+            </div>
+          </div>
+          <div v-else>
+            <p>You are a member of <b>{{ activeCompany?.name }}</b>. To create your own company, contact an admin.</p>
+            <Button variant="outline" class="mt-2" @click="requestCompany = true">Request New Company</Button>
+          </div>
+          <!-- Add Company Dialog -->
+          <Dialog v-model:open="showAddCompany">
+            <DialogContent>
+              <DialogTitle>Add New Company</DialogTitle>
+              <form @submit.prevent="onAddCompany" class="space-y-3">
+                <Input v-model="newCompany.name" placeholder="Company Name" required />
+                <Input v-model="newCompany.sector" placeholder="Sector" required />
+                <Input v-model="newCompany.region" placeholder="Region" required />
+                <Input v-model="newCompany.regulation_profile" placeholder="Regulation Profile" />
+                <Button type="submit" class="bg-[#28A745] hover:bg-[#14532D] w-full">Create Company</Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+          <!-- Request Company Dialog -->
+          <Dialog v-model:open="requestCompany">
+            <DialogContent>
+              <DialogTitle>Request New Company</DialogTitle>
+              <p class="mb-2">Let us know why you want to create a new company. An admin will review your request.</p>
+              <textarea v-model="requestReason" class="w-full border rounded p-2" rows="3" placeholder="Reason (optional)"></textarea>
+              <Button class="mt-2 w-full" @click="submitRequest">Submit Request</Button>
+            </DialogContent>
+          </Dialog>
+        </CardContent>
+      </Card>
       <!-- Account Information Card -->
       <Card>
         <CardHeader>
@@ -157,7 +212,45 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+
+// Company management state
+const { company: activeCompany, loading: companyLoading, refresh: refreshCompany } = useCompanies({ useMock: false })
+const { team } = useTeam({ useMock: false })
+const companies = ref<any[]>([])
+const activeCompanyId = ref<string | null>(null)
+const showAddCompany = ref(false)
+const requestCompany = ref(false)
+const requestReason = ref('')
+const newCompany = ref({ name: '', sector: '', region: '', regulation_profile: '' })
+
+// Simulate fetching all companies for the user (expand as needed)
+async function fetchCompanies() {
+  // TODO: Replace with real API call to fetch all companies for the user
+  companies.value = [activeCompany.value].filter(Boolean)
+  if (activeCompany.value?.id) activeCompanyId.value = activeCompany.value.id
+}
+onMounted(fetchCompanies)
+watch(activeCompany, fetchCompanies)
+
+const isAdminOrOwner = computed(() => {
+  // TODO: Replace with real role check from user_companies or team composable
+  return team.value?.[0]?.role === 'Admin' || team.value?.[0]?.role === 'Owner'
+})
+
+function onAddCompany() {
+  // TODO: Implement real company creation logic (Supabase insert)
+  companies.value.push({ ...newCompany.value, id: Math.random().toString(36).slice(2) })
+  showAddCompany.value = false
+  newCompany.value = { name: '', sector: '', region: '', regulation_profile: '' }
+}
+
+function submitRequest() {
+  // TODO: Implement request logic (e.g., send to support or admin)
+  requestCompany.value = false
+  requestReason.value = ''
+  alert('Request submitted!')
+}
 const { settings, loading, error, refresh, updateSettings } = useSettings({ useMock: false })
 
 // v-models for company fields (matching schema)
