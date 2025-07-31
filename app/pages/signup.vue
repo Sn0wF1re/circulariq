@@ -7,16 +7,7 @@
         <CardDescription class="text-gray-600">Create your CircularIQ account</CardDescription>
       </CardHeader>
       <form @submit.prevent="onSignup" class="space-y-5">
-        <div class="flex gap-3">
-          <div class="flex-1 flex flex-col gap-1">
-            <Label for="first">First Name</Label>
-            <Input id="first" v-model="first" type="text" placeholder="Jane" required />
-          </div>
-          <div class="flex-1 flex flex-col gap-1">
-            <Label for="last">Last Name</Label>
-            <Input id="last" v-model="last" type="text" placeholder="Doe" required />
-          </div>
-        </div>
+        <!-- First and last name fields removed; handled in onboarding -->
         <div class="flex flex-col gap-1">
           <Label for="email">Email</Label>
           <Input id="email" v-model="email" type="email" placeholder="you@email.com" required autofocus />
@@ -50,8 +41,7 @@ import { UserPlus as IconUserPlus, Loader as IconLoader } from 'lucide-vue-next'
 
 definePageMeta({ layout: 'blank' })
 
-const first = ref('')
-const last = ref('')
+// First and last name handled in onboarding
 const email = ref('')
 const password = ref('')
 const confirm = ref('')
@@ -70,21 +60,14 @@ async function onSignup() {
   const { data, error: signUpError } = await supabase.auth.signUp({
     email: email.value,
     password: password.value,
-    options: {
-      data: {
-        first_name: first.value,
-        last_name: last.value,
-        display_name: `${first.value} ${last.value}`,
-      },
-    },
   })
   loading.value = false
   if (signUpError) {
     error.value = signUpError.message || 'Sign up failed.'
     return
   }
-  // Optionally, insert into users table if needed
-  router.push('/onboarding')
+  // After signup, ask user to verify email
+  router.push('/verify-email')
 }
 </script>
 

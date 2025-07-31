@@ -126,7 +126,10 @@ const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 
 onMounted(async () => {
-  if (!user.value) return
+  if (!user.value) {
+    router.push('/login')
+    return
+  }
   await fetchStatus()
   // No prefill for first/last name; always editable in onboarding
   // Fetch user role
