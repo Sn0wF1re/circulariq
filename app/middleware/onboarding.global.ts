@@ -6,7 +6,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   if (!user.value) return
 
   // Don't run on onboarding page or auth pages
-  const authPages = ['/onboarding', '/login', '/signup', '/forgot-password']
+  const authPages = ['/onboarding', '/login', '/signup', '/forgot-password', '/verify-email']
   if (authPages.includes(to.path)) return
 
   // Use composable for onboarding status

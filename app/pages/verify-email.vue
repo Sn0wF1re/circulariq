@@ -18,6 +18,8 @@
 
 <script setup lang="ts">
 import { MailCheck as IconMailCheck } from 'lucide-vue-next'
+
+definePageMeta({ layout: 'blank' })
 </script>
 
 <style scoped>

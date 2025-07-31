@@ -40,6 +40,7 @@ export default defineNuxtConfig({
       callback: '/onboarding',
       exclude: [
         '/signup',
+        '/verify-email',
         '/forgot-password',
         '/onboarding',
         '/billing',
