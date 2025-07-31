@@ -31,7 +31,10 @@
               <IconUsers class="w-4 h-4" />
               Team
             </NuxtLink>
-            <button class="border rounded px-3 py-1 flex items-center gap-2 text-red-600 border-red-300 hover:bg-red-50 font-medium">
+            <button
+              class="border rounded px-3 py-1 flex items-center gap-2 text-red-600 border-red-300 hover:bg-red-50 font-medium"
+              @click="handleLogout"
+            >
               <IconLogOut class="w-4 h-4" />
               Logout
             </button>
@@ -111,5 +114,13 @@ import { Bell as IconBell, Settings as IconSettings, LogOut as IconLogOut, BarCh
 
 const route = useRoute()
 // Fix: define activeTab to avoid runtime error
+const router = useRouter()
+const supabase = useSupabaseClient()
 const activeTab = ref(null)
+
+async function handleLogout() {
+  await supabase.auth.signOut()
+  router.push('/login')
+}
+
 </script>
