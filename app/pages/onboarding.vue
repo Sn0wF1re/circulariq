@@ -62,7 +62,7 @@ definePageMeta({ layout: 'blank' })
         </ul>
       </div>
       <form @submit.prevent="onSubmit" class="space-y-5">
-        <div v-if="!first || !last" class="flex gap-3">
+        <div class="flex gap-3">
           <div class="flex-1 flex flex-col gap-1">
             <Label for="first">First Name</Label>
             <Input id="first" v-model="first" type="text" placeholder="Jane" required />
@@ -70,16 +70,6 @@ definePageMeta({ layout: 'blank' })
           <div class="flex-1 flex flex-col gap-1">
             <Label for="last">Last Name</Label>
             <Input id="last" v-model="last" type="text" placeholder="Doe" required />
-          </div>
-        </div>
-        <div v-else class="flex gap-3">
-          <div class="flex-1 flex flex-col gap-1">
-            <Label>First Name</Label>
-            <Input :value="first" readonly class="bg-gray-100" />
-          </div>
-          <div class="flex-1 flex flex-col gap-1">
-            <Label>Last Name</Label>
-            <Input :value="last" readonly class="bg-gray-100" />
           </div>
         </div>
         <div class="flex flex-col gap-1">
@@ -138,10 +128,7 @@ const user = useSupabaseUser()
 onMounted(async () => {
   if (!user.value) return
   await fetchStatus()
-  if (userProfile.value) {
-    first.value = userProfile.value.first_name || ''
-    last.value = userProfile.value.last_name || ''
-  }
+  // No prefill for first/last name; always editable in onboarding
   // Fetch user role
   const { data: userRoleData } = await supabase
     .from('users')
@@ -181,6 +168,14 @@ async function onSubmit() {
     first_name: first.value,
     last_name: last.value,
     onboarding_complete: true,
+  })
+  // Also update Supabase Auth user metadata
+  await supabase.auth.updateUser({
+    data: {
+      first_name: first.value,
+      last_name: last.value,
+      display_name: `${first.value} ${last.value}`,
+    }
   })
   // If invited, do not allow company creation/edit
   let upsertError
