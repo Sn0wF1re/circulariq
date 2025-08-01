@@ -39,18 +39,18 @@ definePageMeta({ layout: 'blank' })
             <span :class="sector ? 'text-green-700' : 'text-gray-500'">Sector</span>
           </li>
           <li class="flex items-center gap-2">
-            <span :class="region ? 'text-green-600' : 'text-gray-400'">
-              <IconCheck v-if="region" class="w-4 h-4" />
+            <span :class="region_id ? 'text-green-600' : 'text-gray-400'">
+              <IconCheck v-if="region_id" class="w-4 h-4" />
               <IconCircle v-else class="w-4 h-4" />
             </span>
-            <span :class="region ? 'text-green-700' : 'text-gray-500'">Region</span>
+            <span :class="region_id ? 'text-green-700' : 'text-gray-500'">Region</span>
           </li>
           <li class="flex items-center gap-2">
-            <span :class="regulation ? 'text-green-600' : 'text-gray-400'">
-              <IconCheck v-if="regulation" class="w-4 h-4" />
+            <span :class="regulation_profile_id ? 'text-green-600' : 'text-gray-400'">
+              <IconCheck v-if="regulation_profile_id" class="w-4 h-4" />
               <IconCircle v-else class="w-4 h-4" />
             </span>
-            <span :class="regulation ? 'text-green-700' : 'text-gray-500'">Regulation Profile</span>
+            <span :class="regulation_profile_id ? 'text-green-700' : 'text-gray-500'">Regulation Profile</span>
           </li>
           <li class="flex items-center gap-2">
             <span :class="compliance ? 'text-green-600' : 'text-gray-400'">
@@ -82,20 +82,38 @@ definePageMeta({ layout: 'blank' })
         </div>
         <div class="flex flex-col gap-1">
           <Label for="region">Region</Label>
-          <Input id="region" v-model="region" placeholder="North America" required />
+          <Select v-model="region_id">
+            <SelectTrigger id="region-select" class="w-full">
+              <SelectValue placeholder="Select region" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="region in regions" :key="region.id" :value="region.id">{{ region.name }}</SelectItem>
+            </SelectContent>
+          </Select>          
         </div>
         <div class="flex flex-col gap-1">
           <Label for="regulation">Regulation Profile</Label>
-          <Input id="regulation" v-model="regulation" placeholder="EU Packaging" required />
+          <Select v-model="regulation_profile_id">
+            <SelectTrigger id="regulation-profile" class="w-full">
+              <SelectValue placeholder="Select regulation profile" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="profile in regulationProfiles" :key="profile.id" :value="profile.id">{{ profile.name }}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div class="flex flex-col gap-1">
           <Label for="compliance">Compliance Status</Label>
-          <select id="compliance-status" v-model="compliance" required class="w-full border rounded px-2 py-1">
-            <option value="">Select status</option>
-            <option value="compliant">Compliant</option>
-            <option value="non-compliant">Non-compliant</option>
-            <option value="pending">Pending</option>
-          </select>
+          <Select v-model="compliance">
+            <SelectTrigger id="compliance-status" class="w-full">
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="compliant">Compliant</SelectItem>
+              <SelectItem value="non-compliant">Non-compliant</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <Button :disabled="loading" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white font-semibold py-2 rounded">
           <span v-if="loading"><IconLoader class="animate-spin w-4 h-4 inline mr-2" /></span>
@@ -119,16 +137,17 @@ const first = ref('')
 const last = ref('')
 const company = ref('')
 const sector = ref('')
-const region = ref('')
-const regulation = ref('')
+const region_id = ref('')
+const regulation_profile_id = ref('')
 const compliance = ref('')
 const loading = ref(false)
 const error = ref('')
 const userRole = ref('owner')
-const companyLocked = ref(false)
 const router = useRouter()
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const regions = ref<{ id: string; name: string }[]>([])
+const regulationProfiles = ref<{ id: string; name: string }[]>([])
 
 onMounted(async () => {
   if (!user.value) {
@@ -136,7 +155,13 @@ onMounted(async () => {
     return
   }
   await fetchStatus()
-  // No prefill for first/last name; always editable in onboarding
+  // Fetch regions and regulation profiles
+  const { data: regionData } = await supabase.from('regions').select('id, name')
+  regions.value = regionData || []
+
+  const { data: regProfileData } = await supabase.from('regulation_profiles').select('id, name')
+  regulationProfiles.value = regProfileData || []
+
   // Fetch user role
   const { data: userRoleData } = await supabase
     .from('users')
@@ -154,10 +179,9 @@ onMounted(async () => {
     if (companyData) {
       company.value = companyData.name || ''
       sector.value = companyData.sector || ''
-      region.value = companyData.region || ''
-      regulation.value = companyData.regulation_profile || ''
+      region_id.value = companyData.region_id || ''
+      regulation_profile_id.value = companyData.regulation_profile_id || ''
       compliance.value = companyData.compliance_status || ''
-      companyLocked.value = true
     }
   }
 })
@@ -192,9 +216,9 @@ async function onSubmit() {
     const { data: companyData, error: companyError } = await supabase.from('companies').upsert({
       name: company.value,
       sector: sector.value,
-      region: region.value,
-      regulation_profile: regulation.value,
-      compliance: compliance.value,
+      region_id: region_id.value,
+      regulation_profile_id: regulation_profile_id.value,
+      compliance_status: compliance.value,
     }).select('id').single()
     upsertError = companyError
     companyId = companyData?.id
@@ -203,7 +227,7 @@ async function onSubmit() {
       await supabase.from('user_companies').upsert({
         user_id: user.value.id,
         company_id: companyId,
-        role: 'admin',
+        role: 'owner',
       })
     }
   }
