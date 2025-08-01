@@ -90,7 +90,12 @@ definePageMeta({ layout: 'blank' })
         </div>
         <div class="flex flex-col gap-1">
           <Label for="compliance">Compliance Status</Label>
-          <Input id="compliance" v-model="compliance" placeholder="Compliant" required />
+          <select id="compliance-status" v-model="compliance" required class="w-full border rounded px-2 py-1">
+            <option value="">Select status</option>
+            <option value="compliant">Compliant</option>
+            <option value="non-compliant">Non-compliant</option>
+            <option value="pending">Pending</option>
+          </select>
         </div>
         <Button :disabled="loading" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white font-semibold py-2 rounded">
           <span v-if="loading"><IconLoader class="animate-spin w-4 h-4 inline mr-2" /></span>
@@ -165,12 +170,11 @@ async function onSubmit() {
     loading.value = false
     return
   }
-  // Update user profile with first/last name and set onboarding_complete true
+  // Update user profile with first/last name only
   await supabase.from('users').upsert({
     id: user.value.id,
     first_name: first.value,
     last_name: last.value,
-    onboarding_complete: true,
   })
   // Also update Supabase Auth user metadata
   await supabase.auth.updateUser({
@@ -182,16 +186,26 @@ async function onSubmit() {
   })
   // If invited, do not allow company creation/edit
   let upsertError
+  let companyId
   if (userRole.value !== 'invited') {
-    const result = await supabase.from('companies').upsert({
-      user_id: user.value.id,
+    // 1. Upsert company (no user_id)
+    const { data: companyData, error: companyError } = await supabase.from('companies').upsert({
       name: company.value,
       sector: sector.value,
       region: region.value,
       regulation_profile: regulation.value,
-      compliance_status: compliance.value,
-    })
-    upsertError = result.error
+      compliance: compliance.value,
+    }).select('id').single()
+    upsertError = companyError
+    companyId = companyData?.id
+    // 2. Add user as admin in user_companies
+    if (companyId) {
+      await supabase.from('user_companies').upsert({
+        user_id: user.value.id,
+        company_id: companyId,
+        role: 'admin',
+      })
+    }
   }
   loading.value = false
   if (upsertError) {
