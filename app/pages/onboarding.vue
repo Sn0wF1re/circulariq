@@ -126,7 +126,7 @@ definePageMeta({ layout: 'blank' })
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Compass as IconCompass, Loader as IconLoader, Check as IconCheck, Circle as IconCircle } from 'lucide-vue-next'
 
@@ -146,7 +146,9 @@ const userRole = ref('owner')
 const router = useRouter()
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+
 const regions = ref<{ id: string; name: string }[]>([])
+const allRegulationProfiles = ref<{ id: string; name: string }[]>([])
 const regulationProfiles = ref<{ id: string; name: string }[]>([])
 
 onMounted(async () => {
@@ -155,12 +157,13 @@ onMounted(async () => {
     return
   }
   await fetchStatus()
-  // Fetch regions and regulation profiles
+  // Fetch regions and all regulation profiles
   const { data: regionData } = await supabase.from('regions').select('id, name')
   regions.value = regionData || []
 
   const { data: regProfileData } = await supabase.from('regulation_profiles').select('id, name')
-  regulationProfiles.value = regProfileData || []
+  allRegulationProfiles.value = regProfileData || []
+  regulationProfiles.value = allRegulationProfiles.value
 
   // Fetch user role
   const { data: userRoleData } = await supabase
@@ -171,6 +174,24 @@ onMounted(async () => {
   userRole.value = userRoleData?.role || 'owner'
   // If invited, fetch company info and lock fields
   if (userRole.value === 'invited') {
+// Watch region_id and filter regulation profiles accordingly
+watch(region_id, async (newRegionId) => {
+  if (!newRegionId) {
+    regulationProfiles.value = allRegulationProfiles.value
+    return
+  }
+  // Fetch allowed regulation_profile_ids for this region
+  const { data: regionRegProfiles, error } = await supabase
+    .from('region_regulation_profiles')
+    .select('regulation_profile_id')
+    .eq('region_id', newRegionId)
+  if (error) {
+    regulationProfiles.value = allRegulationProfiles.value
+    return
+  }
+  const allowedIds = (regionRegProfiles || []).map(r => r.regulation_profile_id)
+  regulationProfiles.value = allRegulationProfiles.value.filter(profile => allowedIds.includes(profile.id))
+})
     const { data: companyData } = await supabase
       .from('companies')
       .select('name, sector, region, regulation_profile, compliance_status')
