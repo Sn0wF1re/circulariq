@@ -5,8 +5,8 @@ const mockSettings = {
   company: {
     name: 'EcoTech Solutions',
     sector: 'Technology',
-    region: 'North America',
-    regulation_profile: 'EU Packaging',
+    region_id: 'mock-region-uuid',
+    regulation_profile_id: 'mock-regulation-profile-uuid',
     compliance_status: 'Compliant',
   },
   account: {

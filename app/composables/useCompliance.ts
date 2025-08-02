@@ -7,25 +7,25 @@ const mockCompanies = [
     id: '1',
     name: 'EcoTech Solutions',
     sector: 'Technology',
-    region: 'North America',
-    compliance_status: {
-      overall_score: 85,
-      regulations_met: 17,
-      total_regulations: 20
-    },
-    regulation_profile: 'EU-US-CA',
+    region_id: 'mock-region-uuid-1',
+    regulation_profile_id: 'mock-regulation-profile-uuid-1',
+    compliance_score: {
+      overall_score: 92,
+      regulations_met: 11,
+      total_regulations: 12
+    }
   },
   {
     id: '2',
     name: 'GreenPack Industries',
     sector: 'Packaging',
-    region: 'Europe',
-    compliance_status: {
-      overall_score: 92,
-      regulations_met: 18,
-      total_regulations: 20
-    },
-    regulation_profile: 'EU-UK',
+    region_id: 'mock-region-uuid-2',
+    regulation_profile_id: 'mock-regulation-profile-uuid-2',
+    compliance_score: {
+      overall_score: 68,
+      regulations_met: 7,
+      total_regulations: 12
+    }
   }
 ]
 
@@ -45,12 +45,27 @@ export function useCompliance({ useMock = false } = {}) {
     loading.value = true
     error.value = null
     try {
-      // Get all companies for the user (could be filtered by user)
-      const { data, error: companiesError } = await supabase
+      // Fetch companies
+      const { data: companyData, error: companiesError } = await supabase
         .from('companies')
-        .select('id, name, sector, region, compliance_status, regulation_profile')
+        .select('id, name, sector, region_id, regulation_profile_id')
       if (companiesError) throw companiesError
-      companies.value = data || []
+      // Fetch compliance scores for all companies
+      const companyIds = (companyData || []).map(c => c.id)
+      const { data: scoresData, error: scoresError } = await supabase
+        .from('compliance_scores')
+        .select('company_id, regulation_profile_id, overall_score, regulations_met, total_regulations')
+        .in('company_id', companyIds)
+      if (scoresError) throw scoresError
+      // Map scores to companies
+      const scoresMap = new Map()
+      for (const score of scoresData || []) {
+        scoresMap.set(score.company_id, score)
+      }
+      companies.value = (companyData || []).map(c => ({
+        ...c,
+        compliance_score: scoresMap.get(c.id) || { overall_score: 0, regulations_met: 0, total_regulations: 0 }
+      }))
     } catch (e: any) {
       error.value = e.message || 'Failed to fetch companies'
       companies.value = mockCompanies

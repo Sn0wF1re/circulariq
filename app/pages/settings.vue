@@ -29,7 +29,7 @@
               <Button @click="showAddCompany = true" class="bg-[#28A745] hover:bg-[#14532D] h-10 md:mb-0 md:ml-2">Add Company</Button>
             </div>
             <div v-if="activeCompany">
-              <p class="mt-2 text-sm text-gray-600">Sector: {{ activeCompany.sector }} | Region: {{ activeCompany.region }}</p>
+              <p class="mt-2 text-sm text-gray-600">Sector: {{ activeCompany.sector }} | Region: {{ getRegionName(activeCompany.region_id) }}</p>
               <p class="text-sm text-gray-600">Compliance: {{ activeCompany.compliance_status?.status || activeCompany.compliance_status }}</p>
             </div>
           </div>
@@ -44,8 +44,8 @@
               <form @submit.prevent="onAddCompany" class="space-y-3">
                 <Input v-model="newCompany.name" placeholder="Company Name" required />
                 <Input v-model="newCompany.sector" placeholder="Sector" required />
-                <Input v-model="newCompany.region" placeholder="Region" required />
-                <Input v-model="newCompany.regulation_profile" placeholder="Regulation Profile" />
+                <Input v-model="newCompany.region_id" placeholder="Region ID" required />
+                <Input v-model="newCompany.regulation_profile_id" placeholder="Regulation Profile ID" />
                 <Button type="submit" class="bg-[#28A745] hover:bg-[#14532D] w-full">Create Company</Button>
               </form>
             </DialogContent>
@@ -192,11 +192,11 @@
           </div>
           <div class="flex flex-col gap-1">
             <Label for="region">Region</Label>
-            <Input id="region" v-model="region" placeholder="North America" />
+            <Input id="region" v-model="region_id" placeholder="North America" />
           </div>
           <div class="flex flex-col gap-1">
             <Label for="regulation-profile">Regulation Profile</Label>
-            <Input id="regulation-profile" v-model="regulationProfile" placeholder="EU Packaging" />
+            <Input id="regulation-profile" v-model="regulation_profile_id" placeholder="EU Packaging" />
           </div>
           <div class="flex flex-col gap-1">
             <Label for="compliance-status">Compliance Status</Label>
@@ -222,7 +222,7 @@ const activeCompanyId = ref<string | null>(null)
 const showAddCompany = ref(false)
 const requestCompany = ref(false)
 const requestReason = ref('')
-const newCompany = ref({ name: '', sector: '', region: '', regulation_profile: '' })
+const newCompany = ref({ name: '', sector: '', region_id: '', regulation_profile_id: '' })
 
 // Simulate fetching all companies for the user (expand as needed)
 async function fetchCompanies() {
@@ -242,7 +242,7 @@ function onAddCompany() {
   // TODO: Implement real company creation logic (Supabase insert)
   companies.value.push({ ...newCompany.value, id: Math.random().toString(36).slice(2) })
   showAddCompany.value = false
-  newCompany.value = { name: '', sector: '', region: '', regulation_profile: '' }
+  newCompany.value = { name: '', sector: '', region_id: '', regulation_profile_id: '' }
 }
 
 function submitRequest() {
@@ -262,14 +262,16 @@ const sector = computed({
   get: () => settings.value?.company?.sector || '',
   set: v => updateSettings({ company: { ...settings.value.company, sector: v } })
 })
-const region = computed({
-  get: () => settings.value?.company?.region || '',
-  set: v => updateSettings({ company: { ...settings.value.company, region: v } })
+const region_id = computed({
+  get: () => settings.value?.company?.region_id || '',
+  set: v => updateSettings({ company: { ...settings.value.company, region_id: v } })
 })
-const regulationProfile = computed({
-  get: () => settings.value?.company?.regulation_profile || '',
-  set: v => updateSettings({ company: { ...settings.value.company, regulation_profile: v } })
+const regulation_profile_id = computed({
+  get: () => settings.value?.company?.regulation_profile_id || '',
+  set: v => updateSettings({ company: { ...settings.value.company, regulation_profile_id: v } })
 })
+import { useRegionAndRegulationNames } from '@/app/composables/useRegionAndRegulationNames'
+const { getRegionName, getRegulationProfileName } = useRegionAndRegulationNames()
 const complianceStatus = computed({
   get: () => settings.value?.company?.compliance_status || '',
   set: v => updateSettings({ company: { ...settings.value.company, compliance_status: v } })

@@ -4,10 +4,14 @@ const mockCompany = {
   id: 'mock-uuid',
   name: 'EcoTech Solutions',
   sector: 'Technology',
-  region: 'North America',
-  compliance_status: { status: 'Compliant' },
-  regulation_profile: 'EU Packaging',
+  region_id: 'mock-region-uuid',
+  regulation_profile_id: 'mock-regulation-profile-uuid',
   updated_at: new Date().toISOString(),
+  compliance_score: {
+    overall_score: 92,
+    regulations_met: 11,
+    total_regulations: 12
+  }
 }
 
 export function useCompanies({ useMock = false } = {}) {
@@ -38,13 +42,25 @@ export function useCompanies({ useMock = false } = {}) {
     try {
       const companyId = await getCompanyId()
       if (!companyId) throw new Error('No company found for user')
+      // Fetch company data
       const { data, error: companyError } = await supabase
         .from('companies')
-        .select('id, name, sector, region, compliance_status, regulation_profile, updated_at')
+        .select('id, name, sector, region_id, regulation_profile_id, updated_at')
         .eq('id', companyId)
         .single()
       if (companyError) throw companyError
-      company.value = data
+      // Fetch compliance score for this company
+      const { data: scoreData, error: scoreError } = await supabase
+        .from('compliance_scores')
+        .select('company_id, regulation_profile_id, overall_score, regulations_met, total_regulations')
+        .eq('company_id', companyId)
+        .single()
+      if (scoreError) {
+        // If no score, fallback to default
+        company.value = { ...data, compliance_score: { overall_score: 0, regulations_met: 0, total_regulations: 0 } }
+      } else {
+        company.value = { ...data, compliance_score: scoreData }
+      }
     } catch (e: any) {
       error.value = e.message || 'Failed to fetch company data'
       company.value = mockCompany

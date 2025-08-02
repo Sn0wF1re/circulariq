@@ -90,6 +90,7 @@
               <th class="font-semibold text-gray-700">Weight</th>
               <th class="font-semibold text-gray-700">Recycled %</th>
               <th class="font-semibold text-gray-700">Recyclability %</th>
+              <th class="font-semibold text-gray-700">Compliance Score</th>
               <th class="font-semibold text-gray-700">Actions</th>
             </tr>
           </thead>
@@ -104,6 +105,12 @@
               <td class="px-4 py-3">{{ product.weight_grams }}g</td>
               <td class="px-4 py-3">{{ product.recycled_pct }}%</td>
               <td class="px-4 py-3">{{ product.recyclability_pct }}%</td>
+              <td class="px-4 py-3">
+                <span v-if="product.compliance_score && product.compliance_score.overall_score !== undefined">
+                  {{ product.compliance_score.overall_score }}%
+                </span>
+                <span v-else>-</span>
+              </td>
               <td class="px-4 py-3">
                 <button class="text-blue-600 hover:underline flex items-center gap-1">
                   <Eye class="w-4 h-4" /> View

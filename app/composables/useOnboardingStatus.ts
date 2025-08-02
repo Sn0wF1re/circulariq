@@ -32,7 +32,7 @@ export function useOnboardingStatus() {
     // Fetch company profile
     const { data: company, error: companyError } = await supabase
       .from('companies')
-      .select('id, name, sector, region, regulation_profile, compliance_status, user_id')
+      .select('id, name, sector, region_id, regulation_profile_id, compliance_status, user_id')
       .eq('user_id', user.value.id)
       .single()
     if (companyError || !company) {
@@ -44,7 +44,7 @@ export function useOnboardingStatus() {
     companyProfile.value = company
     // Check required fields
     if (!profile.first_name || !profile.last_name) onboardingComplete.value = false
-    if (!company.name || !company.sector || !company.region || !company.regulation_profile || !company.compliance_status) onboardingComplete.value = false
+    if (!company.name || !company.sector || !company.region_id || !company.regulation_profile_id || !company.compliance_status) onboardingComplete.value = false
     loading.value = false
   }
 
