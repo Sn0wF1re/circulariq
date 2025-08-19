@@ -119,6 +119,7 @@
           Complete Setup
         </Button>
         <div v-if="error" class="text-red-600 text-sm text-center">{{ error }}</div>
+        <div v-if="!error && loading === false && companyId" class="text-green-700 text-sm text-center">Onboarding complete! Redirecting...</div>
       </form>
     </Card>
   </div>
@@ -131,23 +132,33 @@ import { Compass as IconCompass, Loader as IconLoader, Check as IconCheck, Circl
 
 definePageMeta({ layout: 'blank' })
 
-const { userProfile, companyProfile, userRole, onboardingComplete, fetchStatus, loading, error } = useOnboardingStatus()
-const first = ref('')
-const last = ref('')
-const company = ref('')
-const sector = ref('')
-const region_id = ref('')
-const regulation_profile_id = ref('')
-const compliance = ref('')
+const { companyProfile, userRole, fetchStatus, loading, error } = useOnboardingStatus()
+const first = ref<string>('')
+const last = ref<string>('')
+const company = ref<string>('')
+const sector = ref<string>('')
+const region_id = ref<string>('')
+const regulation_profile_id = ref<string>('')
+const compliance = ref<string>('')
 const router = useRouter()
 const supabase = useSupabaseClient()
-const supaUser = useSupabaseUser()
+const supaUser = useSupabaseUser() // Used only for UI-level authentication check
 
 const regions = ref<{ id: string; name: string }[]>([])
 const allRegulationProfiles = ref<{ id: string; name: string }[]>([])
 const regulationProfiles = ref<{ id: string; name: string }[]>([])
+let companyId: string | null = null
+
+function prefillCompanyFields(profile: any) {
+  company.value = profile.name || ''
+  sector.value = profile.sector || ''
+  region_id.value = profile.region_id || ''
+  regulation_profile_id.value = profile.regulation_profile_id || ''
+  compliance.value = profile.compliance_status || ''
+}
 
 onMounted(async () => {
+  // UI-level authentication check (reactive)
   if (!supaUser.value) {
     router.push('/login')
     return
@@ -161,13 +172,9 @@ onMounted(async () => {
   allRegulationProfiles.value = regProfileData || []
   regulationProfiles.value = allRegulationProfiles.value
 
-  // If invited, prefill fields from companyProfile
-  if (userRole.value !== 'owner' && companyProfile.value) {
-    company.value = companyProfile.value.name || ''
-    sector.value = companyProfile.value.sector || ''
-    region_id.value = companyProfile.value.region_id || ''
-    regulation_profile_id.value = companyProfile.value.regulation_profile_id || ''
-    compliance.value = companyProfile.value.compliance_status || ''
+  // Prefill fields for invited users (if companyProfile exists)
+  if (companyProfile.value) {
+    prefillCompanyFields(companyProfile.value)
     // Watch region_id and filter regulation profiles accordingly
     watch(region_id, async (newRegionId) => {
       if (!newRegionId) {
@@ -217,8 +224,7 @@ async function onSubmit() {
       }
     })
 
-    let insertError
-    let companyId
+  let insertError
     if (userRole.value === 'owner') {
       // New company onboarding
       const { data: companyData, error: companyError } = await supabase.from('companies').insert({
@@ -229,7 +235,7 @@ async function onSubmit() {
         compliance_status: compliance.value,
       }).select('id').single()
       insertError = companyError
-      companyId = companyData?.id
+      companyId = companyData?.id || null
       if (companyId) {
         await supabase.from('user_companies').upsert({
           user_id: authUser.id,
@@ -242,10 +248,15 @@ async function onSubmit() {
       error.value = insertError.message || 'Failed to save company profile.'
       return
     }
+    // Show a brief success message before redirecting
+    error.value = ''
     await supabase.from('users').update({
       onboarding_complete: true
     }).eq('id', authUser.id)
-    router.push('/dashboard')
+    // Optionally, show a success notification here
+    setTimeout(() => {
+      router.push('/dashboard')
+    }, 500)
   } catch (err: any) {
     console.error('Submission error:', err)
     error.value = err?.message || 'An unexpected error occurred'
