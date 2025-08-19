@@ -48,7 +48,6 @@
 
 <script setup>
 import { CheckCircle, AlertTriangle } from 'lucide-vue-next'
-import { useRegionAndRegulationNames } from '@/app/composables/useRegionAndRegulationNames'
 const { companies, loading, error, refresh } = useCompliance()
 const { getRegionName, getRegulationProfileName } = useRegionAndRegulationNames()
 

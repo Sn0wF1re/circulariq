@@ -270,7 +270,6 @@ const regulation_profile_id = computed({
   get: () => settings.value?.company?.regulation_profile_id || '',
   set: v => updateSettings({ company: { ...settings.value.company, regulation_profile_id: v } })
 })
-import { useRegionAndRegulationNames } from '@/app/composables/useRegionAndRegulationNames'
 const { getRegionName, getRegulationProfileName } = useRegionAndRegulationNames()
 const complianceStatus = computed({
   get: () => settings.value?.company?.compliance_status || '',

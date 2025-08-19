@@ -1,4 +1,3 @@
-definePageMeta({ layout: 'blank' })
 <template>
   <div class="min-h-screen flex items-center justify-center bg-[#EFFBF0]">
     <Card class="w-full max-w-2xl min-w-[350px] p-10 shadow-lg bg-white rounded-xl">
@@ -132,7 +131,7 @@ import { Compass as IconCompass, Loader as IconLoader, Check as IconCheck, Circl
 
 definePageMeta({ layout: 'blank' })
 
-const { userProfile, fetchStatus } = useOnboardingStatus()
+const { userProfile, companyProfile, userRole, onboardingComplete, fetchStatus, loading, error } = useOnboardingStatus()
 const first = ref('')
 const last = ref('')
 const company = ref('')
@@ -140,19 +139,16 @@ const sector = ref('')
 const region_id = ref('')
 const regulation_profile_id = ref('')
 const compliance = ref('')
-const loading = ref(false)
-const error = ref('')
-const userRole = ref('owner')
 const router = useRouter()
 const supabase = useSupabaseClient()
-const user = useSupabaseUser()
+const supaUser = useSupabaseUser()
 
 const regions = ref<{ id: string; name: string }[]>([])
 const allRegulationProfiles = ref<{ id: string; name: string }[]>([])
 const regulationProfiles = ref<{ id: string; name: string }[]>([])
 
 onMounted(async () => {
-  if (!user.value) {
+  if (!supaUser.value) {
     router.push('/login')
     return
   }
@@ -165,99 +161,97 @@ onMounted(async () => {
   allRegulationProfiles.value = regProfileData || []
   regulationProfiles.value = allRegulationProfiles.value
 
-  // Fetch user role
-  const { data: userRoleData } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.value.id)
-    .single()
-  userRole.value = userRoleData?.role || 'owner'
-  // If invited, fetch company info and lock fields
-  if (userRole.value === 'invited') {
-// Watch region_id and filter regulation profiles accordingly
-watch(region_id, async (newRegionId) => {
-  if (!newRegionId) {
-    regulationProfiles.value = allRegulationProfiles.value
-    return
+  // If invited, prefill fields from companyProfile
+  if (userRole.value !== 'owner' && companyProfile.value) {
+    company.value = companyProfile.value.name || ''
+    sector.value = companyProfile.value.sector || ''
+    region_id.value = companyProfile.value.region_id || ''
+    regulation_profile_id.value = companyProfile.value.regulation_profile_id || ''
+    compliance.value = companyProfile.value.compliance_status || ''
+    // Watch region_id and filter regulation profiles accordingly
+    watch(region_id, async (newRegionId) => {
+      if (!newRegionId) {
+        regulationProfiles.value = allRegulationProfiles.value
+        return
+      }
+      const { data: regionRegProfiles, error } = await supabase
+        .from('region_regulation_profiles')
+        .select('regulation_profile_id')
+        .eq('region_id', newRegionId)
+      if (error) {
+        regulationProfiles.value = allRegulationProfiles.value
+        return
+      }
+      const allowedIds = (regionRegProfiles || []).map(r => r.regulation_profile_id)
+      regulationProfiles.value = allRegulationProfiles.value.filter(profile => allowedIds.includes(profile.id))
+    })
   }
-  // Fetch allowed regulation_profile_ids for this region
-  const { data: regionRegProfiles, error } = await supabase
-    .from('region_regulation_profiles')
-    .select('regulation_profile_id')
-    .eq('region_id', newRegionId)
-  if (error) {
-    regulationProfiles.value = allRegulationProfiles.value
-    return
-  }
-  const allowedIds = (regionRegProfiles || []).map(r => r.regulation_profile_id)
-  regulationProfiles.value = allRegulationProfiles.value.filter(profile => allowedIds.includes(profile.id))
-})
-    const { data: companyData } = await supabase
-      .from('companies')
-      .select('name, sector, region, regulation_profile, compliance_status')
-      .eq('user_id', user.value.id)
-      .single()
-    if (companyData) {
-      company.value = companyData.name || ''
-      sector.value = companyData.sector || ''
-      region_id.value = companyData.region_id || ''
-      regulation_profile_id.value = companyData.regulation_profile_id || ''
-      compliance.value = companyData.compliance_status || ''
-    }
-  }
+  // If onboarding for new company, fields remain empty for user input
 })
 
 async function onSubmit() {
   loading.value = true
   error.value = ''
-  if (!user.value) {
-    error.value = 'User not authenticated.'
+  // CRITICAL: Verify authentication
+  const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
+  if (authError || !authUser) {
+    error.value = 'Authentication failed. Please log in again.'
     loading.value = false
+    router.push('/login')
     return
   }
-  // Update user profile with first/last name only
-  await supabase.from('users').upsert({
-    id: user.value.id,
-    first_name: first.value,
-    last_name: last.value,
-  })
-  // Also update Supabase Auth user metadata
-  await supabase.auth.updateUser({
-    data: {
+  try {
+    // Update user profile with first/last name only
+    const { error: userUpdateError } = await supabase.from('users').update({
       first_name: first.value,
       last_name: last.value,
-      display_name: `${first.value} ${last.value}`,
+    }).eq('id', authUser.id)
+    if (userUpdateError) throw userUpdateError
+
+    // Also update Supabase Auth user metadata
+    await supabase.auth.updateUser({
+      data: {
+        first_name: first.value,
+        last_name: last.value,
+        display_name: `${first.value} ${last.value}`,
+      }
+    })
+
+    let insertError
+    let companyId
+    if (userRole.value === 'owner') {
+      // New company onboarding
+      const { data: companyData, error: companyError } = await supabase.from('companies').insert({
+        name: company.value,
+        sector: sector.value,
+        region_id: region_id.value,
+        regulation_profile_id: regulation_profile_id.value,
+        compliance_status: compliance.value,
+      }).select('id').single()
+      insertError = companyError
+      companyId = companyData?.id
+      if (companyId) {
+        await supabase.from('user_companies').upsert({
+          user_id: authUser.id,
+          company_id: companyId,
+          role: 'owner',
+        })
+      }
     }
-  })
-  // If invited, do not allow company creation/edit
-  let upsertError
-  let companyId
-  if (userRole.value !== 'invited') {
-    // 1. Upsert company (no user_id)
-    const { data: companyData, error: companyError } = await supabase.from('companies').upsert({
-      name: company.value,
-      sector: sector.value,
-      region_id: region_id.value,
-      regulation_profile_id: regulation_profile_id.value,
-      compliance_status: compliance.value,
-    }).select('id').single()
-    upsertError = companyError
-    companyId = companyData?.id
-    // 2. Add user as admin in user_companies
-    if (companyId) {
-      await supabase.from('user_companies').upsert({
-        user_id: user.value.id,
-        company_id: companyId,
-        role: 'owner',
-      })
+    if (insertError) {
+      error.value = insertError.message || 'Failed to save company profile.'
+      return
     }
+    await supabase.from('users').update({
+      onboarding_complete: true
+    }).eq('id', authUser.id)
+    router.push('/dashboard')
+  } catch (err: any) {
+    console.error('Submission error:', err)
+    error.value = err?.message || 'An unexpected error occurred'
+  } finally {
+    loading.value = false
   }
-  loading.value = false
-  if (upsertError) {
-    error.value = upsertError.message || 'Failed to save company profile.'
-    return
-  }
-  router.push('/dashboard')
 }
 </script>
 

@@ -17,7 +17,7 @@
             <DialogTitle>Add New Product</DialogTitle>
             <DialogDescription>Enter product details for sustainability tracking</DialogDescription>
           </DialogHeader>
-          <form @submit.prevent="addProduct">
+          <form @submit.prevent="handleAddProduct">
             <div class="space-y-4">
               <div class="flex flex-col gap-1">
                 <Label for="product-name" class="block">Product Name</Label>

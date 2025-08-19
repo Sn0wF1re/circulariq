@@ -14,10 +14,10 @@ export function useOnboardingStatus() {
     if (!user.value) return
     loading.value = true
     error.value = ''
-    // Fetch user profile
+    // Fetch user profile (onboarding_complete, names)
     const { data: profile, error: userError } = await supabase
       .from('users')
-      .select('id, first_name, last_name, onboarding_complete, role')
+      .select('id, first_name, last_name, onboarding_complete')
       .eq('id', user.value.id)
       .single()
     if (userError || !profile) {
@@ -27,24 +27,29 @@ export function useOnboardingStatus() {
       return
     }
     userProfile.value = profile
-    userRole.value = profile.role || 'owner'
     onboardingComplete.value = !!profile.onboarding_complete
-    // Fetch company profile
-    const { data: company, error: companyError } = await supabase
-      .from('companies')
-      .select('id, name, sector, region_id, regulation_profile_id, compliance_status, user_id')
+
+    // Fetch user_companies (role, company_id)
+    const { data: userCompany, error: ucError } = await supabase
+      .from('user_companies')
+      .select('role, company_id')
       .eq('user_id', user.value.id)
       .single()
-    if (companyError || !company) {
+    if (ucError || !userCompany) {
       companyProfile.value = null
-      onboardingComplete.value = false
+      userRole.value = 'owner'
       loading.value = false
       return
     }
-    companyProfile.value = company
-    // Check required fields
-    if (!profile.first_name || !profile.last_name) onboardingComplete.value = false
-    if (!company.name || !company.sector || !company.region_id || !company.regulation_profile_id || !company.compliance_status) onboardingComplete.value = false
+    userRole.value = userCompany.role
+
+    // Fetch company profile
+    const { data: company, error: companyError } = await supabase
+      .from('companies')
+      .select('id, name, sector, region_id, regulation_profile_id, compliance_status')
+      .eq('id', userCompany.company_id)
+      .single()
+    companyProfile.value = company || null
     loading.value = false
   }
 
