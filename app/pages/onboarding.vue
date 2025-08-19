@@ -233,7 +233,7 @@ async function onSubmit() {
         region_id: region_id.value,
         regulation_profile_id: regulation_profile_id.value,
         compliance_status: compliance.value,
-      }).select('id').single()
+      }).select('id').maybeSingle()
       insertError = companyError
       companyId = companyData?.id || null
       if (companyId) {
