@@ -19,7 +19,7 @@ export function useOnboardingStatus() {
       .from('users')
       .select('id, first_name, last_name, onboarding_complete')
       .eq('id', user.value.id)
-      .single()
+      .maybeSingle()
     if (userError || !profile) {
       onboardingComplete.value = false
       error.value = userError?.message || 'User profile not found.'
@@ -29,13 +29,21 @@ export function useOnboardingStatus() {
     userProfile.value = profile
     onboardingComplete.value = !!profile.onboarding_complete
 
-    // Fetch user_companies (role, company_id)
+    // Fetch user_companies (role, company_id) - allow zero rows for new users
     const { data: userCompany, error: ucError } = await supabase
       .from('user_companies')
       .select('role, company_id')
       .eq('user_id', user.value.id)
-      .single()
-    if (ucError || !userCompany) {
+      .maybeSingle()
+    if (ucError) {
+      error.value = ucError.message || 'Error fetching user-company relationship.'
+      companyProfile.value = null
+      userRole.value = 'owner'
+      loading.value = false
+      return
+    }
+    if (!userCompany) {
+      // New user, not yet linked to a company
       companyProfile.value = null
       userRole.value = 'owner'
       loading.value = false
@@ -43,12 +51,18 @@ export function useOnboardingStatus() {
     }
     userRole.value = userCompany.role
 
-    // Fetch company profile
+    // Fetch company profile - allow zero rows if company is missing
     const { data: company, error: companyError } = await supabase
       .from('companies')
       .select('id, name, sector, region_id, regulation_profile_id, compliance_status')
       .eq('id', userCompany.company_id)
-      .single()
+      .maybeSingle()
+    if (companyError) {
+      error.value = companyError.message || 'Error fetching company profile.'
+      companyProfile.value = null
+      loading.value = false
+      return
+    }
     companyProfile.value = company || null
     loading.value = false
   }
