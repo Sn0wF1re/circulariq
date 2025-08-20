@@ -189,22 +189,13 @@ async function onSubmit() {
   error.value = ''
   console.log('onSubmit() - user:', user.value)
   try {
-    // Update user profile with first/last name only
-    console.log(`first: ${first.value}, last: ${last.value}`)
-    const { error: userUpdateError } = await supabase.from('users').update({
-      first_name: first.value,
-      last_name: last.value,
-    }).eq('id', user.value.id)
-    if (userUpdateError) throw userUpdateError
-
-    console.log('User name updated')
-
-    // Also update Supabase Auth user metadata
+    // Update Supabase Auth user metadata (triggers sync to public.users)
     await supabase.auth.updateUser({
       data: {
         first_name: first.value,
         last_name: last.value,
         display_name: `${first.value} ${last.value}`,
+        onboarding_complete: true
       }
     })
     console.log('auth user updated')
@@ -234,14 +225,10 @@ async function onSubmit() {
       error.value = insertError.message || 'Failed to save company profile.'
       return
     }
-    // Show a brief success message before redirecting
-    error.value = ''
-    await supabase.from('users').update({
-      onboarding_complete: true
-    }).eq('id', user.value.id)
-
-    console.log('Form rendered')
-    router.push('/dashboard')
+  // Show a brief success message before redirecting
+  error.value = ''
+  console.log('Form rendered')
+  router.push('/dashboard')
   } catch (err: any) {
     console.error('Submission error:', err)
     error.value = err?.message || 'An unexpected error occurred'
