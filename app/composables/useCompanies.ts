@@ -18,65 +18,69 @@ export function useCompanies({ useMock = false } = {}) {
   const supabase = useSupabaseClient()
   const user = useSupabaseUser()
 
-  const company = ref<any>(null)
+  const companies = ref<any[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function getCompanyId() {
-    if (!user.value) return null
-    const { data, error } = await supabase
-      .from('user_companies')
-      .select('company_id')
-      .eq('user_id', user.value.id)
-      .single()
-    return data?.company_id || null
-  }
-
-  async function fetchCompany() {
+  async function fetchCompanies() {
     if (useMock) {
-      company.value = mockCompany
+      companies.value = [mockCompany]
       return
     }
     loading.value = true
     error.value = null
     try {
-      const companyId = await getCompanyId()
-      if (!companyId) throw new Error('No company found for user')
-      // Fetch company data
-      const { data, error: companyError } = await supabase
+      if (!user.value) throw new Error('No user logged in')
+      // Get all companies for this user, including role
+      const { data: userCompanies, error: userCompaniesError } = await supabase
+        .from('user_companies')
+        .select('company_id, role')
+        .eq('user_id', user.value.id)
+      if (userCompaniesError) throw userCompaniesError
+      if (!userCompanies || userCompanies.length === 0) throw new Error('No companies found for user')
+
+      // Fetch all company data
+      const companyIds = userCompanies.map((uc: any) => uc.company_id)
+      const { data: companyData, error: companyError } = await supabase
         .from('companies')
         .select('id, name, sector, region_id, regulation_profile_id, updated_at')
-        .eq('id', companyId)
-        .single()
+        .in('id', companyIds)
       if (companyError) throw companyError
-      // Fetch compliance score for this company
-      const { data: scoreData, error: scoreError } = await supabase
+
+      // Fetch compliance scores for all companies
+      const { data: scoresData, error: scoresError } = await supabase
         .from('compliance_scores')
         .select('company_id, regulation_profile_id, overall_score, regulations_met, total_regulations')
-        .eq('company_id', companyId)
-        .single()
-      if (scoreError) {
-        // If no score, fallback to default
-        company.value = { ...data, compliance_score: { overall_score: 0, regulations_met: 0, total_regulations: 0 } }
-      } else {
-        company.value = { ...data, compliance_score: scoreData }
-      }
+        .in('company_id', companyIds)
+      // Map scores by company_id
+      const scoresMap = (scoresData || []).reduce((acc: any, score: any) => {
+        acc[score.company_id] = score
+        return acc
+      }, {})
+
+      // Merge company data, user role, and compliance score
+      companies.value = companyData.map((c: any) => {
+        const userCompany = userCompanies.find((uc: any) => uc.company_id === c.id)
+        return {
+          ...c,
+          role: userCompany?.role || 'member',
+          compliance_score: scoresMap[c.id] || { overall_score: 0, regulations_met: 0, total_regulations: 0 }
+        }
+      })
     } catch (e: any) {
-      error.value = e.message || 'Failed to fetch company data'
-      company.value = mockCompany
+      error.value = e.message || 'Failed to fetch companies'
+      companies.value = []
     } finally {
       loading.value = false
     }
   }
 
-  onMounted(fetchCompany)
-
-  const companyToShow = computed(() => company.value || mockCompany)
+  onMounted(fetchCompanies)
 
   return {
-    company: companyToShow,
+    companies,
     loading,
     error,
-    refresh: fetchCompany
+    refresh: fetchCompanies
   }
 }

@@ -212,35 +212,41 @@
 </template>
 
 <script setup lang="ts">
+
 import { ref, computed, watch, onMounted } from 'vue'
 
-// Company management state
-const { company: activeCompany, loading: companyLoading, refresh: refreshCompany } = useCompanies({ useMock: false })
-const { team } = useTeam({ useMock: false })
-const companies = ref<any[]>([])
+// Multi-company management state
+const { companies, loading: companiesLoading, error: companiesError, refresh: refreshCompanies } = useCompanies({ useMock: false })
 const activeCompanyId = ref<string | null>(null)
 const showAddCompany = ref(false)
 const requestCompany = ref(false)
 const requestReason = ref('')
 const newCompany = ref({ name: '', sector: '', region_id: '', regulation_profile_id: '' })
 
-// Simulate fetching all companies for the user (expand as needed)
-async function fetchCompanies() {
-  // TODO: Replace with real API call to fetch all companies for the user
-  companies.value = [activeCompany.value].filter(Boolean)
-  if (activeCompany.value?.id) activeCompanyId.value = activeCompany.value.id
-}
-onMounted(fetchCompanies)
-watch(activeCompany, fetchCompanies)
+// Set active company to first in list by default
+onMounted(() => {
+  if (companies.value.length > 0) {
+    activeCompanyId.value = companies.value[0].id
+  }
+})
+// Watch for company list changes
+watch(companies, (val) => {
+  if (val.length > 0 && !activeCompanyId.value) {
+    activeCompanyId.value = val[0].id
+  }
+})
 
+const activeCompany = computed(() => companies.value.find(c => c.id === activeCompanyId.value) || null)
+
+// Example: check if user is admin/owner in selected company
 const isAdminOrOwner = computed(() => {
-  // TODO: Replace with real role check from user_companies or team composable
-  return team.value?.[0]?.role === 'Admin' || team.value?.[0]?.role === 'Owner'
+  const role = activeCompany.value?.role
+  return role === 'admin' || role === 'owner' || role === 'Admin' || role === 'Owner'
 })
 
 function onAddCompany() {
   // TODO: Implement real company creation logic (Supabase insert)
-  companies.value.push({ ...newCompany.value, id: Math.random().toString(36).slice(2) })
+  companies.value.push({ ...newCompany.value, id: Math.random().toString(36).slice(2), role: 'owner' })
   showAddCompany.value = false
   newCompany.value = { name: '', sector: '', region_id: '', regulation_profile_id: '' }
 }
@@ -251,28 +257,29 @@ function submitRequest() {
   requestReason.value = ''
   alert('Request submitted!')
 }
+
 const { settings, loading, error, refresh, updateSettings } = useSettings({ useMock: false })
 
 // v-models for company fields (matching schema)
 const companyName = computed({
-  get: () => settings.value?.company?.name || '',
-  set: v => updateSettings({ company: { ...settings.value.company, name: v } })
+  get: () => activeCompany.value?.name || '',
+  set: v => { if (activeCompany.value) activeCompany.value.name = v }
 })
 const sector = computed({
-  get: () => settings.value?.company?.sector || '',
-  set: v => updateSettings({ company: { ...settings.value.company, sector: v } })
+  get: () => activeCompany.value?.sector || '',
+  set: v => { if (activeCompany.value) activeCompany.value.sector = v }
 })
 const region_id = computed({
-  get: () => settings.value?.company?.region_id || '',
-  set: v => updateSettings({ company: { ...settings.value.company, region_id: v } })
+  get: () => activeCompany.value?.region_id || '',
+  set: v => { if (activeCompany.value) activeCompany.value.region_id = v }
 })
 const regulation_profile_id = computed({
-  get: () => settings.value?.company?.regulation_profile_id || '',
-  set: v => updateSettings({ company: { ...settings.value.company, regulation_profile_id: v } })
+  get: () => activeCompany.value?.regulation_profile_id || '',
+  set: v => { if (activeCompany.value) activeCompany.value.regulation_profile_id = v }
 })
 const { getRegionName, getRegulationProfileName } = useRegionAndRegulationNames()
 const complianceStatus = computed({
-  get: () => settings.value?.company?.compliance_status || '',
-  set: v => updateSettings({ company: { ...settings.value.company, compliance_status: v } })
+  get: () => activeCompany.value?.compliance_status || '',
+  set: v => { if (activeCompany.value) activeCompany.value.compliance_status = v }
 })
 </script>
