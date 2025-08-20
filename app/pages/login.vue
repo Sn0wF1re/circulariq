@@ -22,7 +22,7 @@
           </div>
           <NuxtLink to="/forgot-password" class="text-sm text-[#28A745] hover:underline">Forgot password?</NuxtLink>
         </div>
-        <Button :disabled="loading" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white font-semibold py-2 rounded">
+  <Button type="submit" :disabled="loading" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white font-semibold py-2 rounded">
           <span v-if="loading"><IconLoader class="animate-spin w-4 h-4 inline mr-2" /></span>
           Sign In
         </Button>
@@ -63,7 +63,7 @@ async function onLogin() {
     error.value = authError.message || 'Login failed.'
     return
   }
-  router.push('/')
+  router.push('/onboarding')
 }
 </script>
 

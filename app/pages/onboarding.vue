@@ -114,7 +114,7 @@
             </SelectContent>
           </Select>
         </div>
-        <Button :disabled="loading" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white font-semibold py-2 rounded">
+        <Button type="submit" :disabled="loading" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white font-semibold py-2 rounded">
           <span v-if="loading"><IconLoader class="animate-spin w-4 h-4 inline mr-2" /></span>
           Complete Setup
         </Button>
@@ -132,7 +132,6 @@ import { Compass as IconCompass, Loader as IconLoader, Check as IconCheck, Circl
 
 definePageMeta({ layout: 'blank' })
 
-const { companyProfile, userRole, fetchStatus, loading, error } = useOnboardingStatus()
 const first = ref<string>('')
 const last = ref<string>('')
 const company = ref<string>('')
@@ -142,28 +141,22 @@ const regulation_profile_id = ref<string>('')
 const compliance = ref<string>('')
 const router = useRouter()
 const supabase = useSupabaseClient()
-const supaUser = useSupabaseUser() // Used only for UI-level authentication check
-
+const user = useSupabaseUser()
+const loading = ref(false)
+const error = ref('')
 const regions = ref<{ id: string; name: string }[]>([])
 const allRegulationProfiles = ref<{ id: string; name: string }[]>([])
 const regulationProfiles = ref<{ id: string; name: string }[]>([])
 let companyId: string | null = null
 
-function prefillCompanyFields(profile: any) {
-  company.value = profile.name || ''
-  sector.value = profile.sector || ''
-  region_id.value = profile.region_id || ''
-  regulation_profile_id.value = profile.regulation_profile_id || ''
-  compliance.value = profile.compliance_status || ''
-}
-
 onMounted(async () => {
   // UI-level authentication check (reactive)
-  if (!supaUser.value) {
+  if (!user.value) {
     router.push('/login')
     return
   }
-  await fetchStatus()
+
+  console.log('Supa user: ', user)
   // Fetch regions and all regulation profiles
   const { data: regionData } = await supabase.from('regions').select('id, name')
   regions.value = regionData || []
@@ -172,48 +165,39 @@ onMounted(async () => {
   allRegulationProfiles.value = regProfileData || []
   regulationProfiles.value = allRegulationProfiles.value
 
-  // Prefill fields for invited users (if companyProfile exists)
-  if (companyProfile.value) {
-    prefillCompanyFields(companyProfile.value)
-    // Watch region_id and filter regulation profiles accordingly
-    watch(region_id, async (newRegionId) => {
-      if (!newRegionId) {
-        regulationProfiles.value = allRegulationProfiles.value
-        return
-      }
-      const { data: regionRegProfiles, error } = await supabase
-        .from('region_regulation_profiles')
-        .select('regulation_profile_id')
-        .eq('region_id', newRegionId)
-      if (error) {
-        regulationProfiles.value = allRegulationProfiles.value
-        return
-      }
-      const allowedIds = (regionRegProfiles || []).map(r => r.regulation_profile_id)
-      regulationProfiles.value = allRegulationProfiles.value.filter(profile => allowedIds.includes(profile.id))
-    })
-  }
-  // If onboarding for new company, fields remain empty for user input
+  // Watch region_id and filter regulation profiles accordingly
+  watch(region_id, async (newRegionId) => {
+    if (!newRegionId) {
+      regulationProfiles.value = allRegulationProfiles.value
+      return
+    }
+    const { data: regionRegProfiles, error } = await supabase
+      .from('region_regulation_profiles')
+      .select('regulation_profile_id')
+      .eq('region_id', newRegionId)
+    if (error) {
+      regulationProfiles.value = allRegulationProfiles.value
+      return
+    }
+    const allowedIds = (regionRegProfiles || []).map(r => r.regulation_profile_id)
+    regulationProfiles.value = allRegulationProfiles.value.filter(profile => allowedIds.includes(profile.id))
+  })
 })
 
 async function onSubmit() {
   loading.value = true
   error.value = ''
-  // CRITICAL: Verify authentication
-  const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
-  if (authError || !authUser) {
-    error.value = 'Authentication failed. Please log in again.'
-    loading.value = false
-    router.push('/login')
-    return
-  }
+  console.log('onSubmit() - user:', user.value)
   try {
     // Update user profile with first/last name only
+    console.log(`first: ${first.value}, last: ${last.value}`)
     const { error: userUpdateError } = await supabase.from('users').update({
       first_name: first.value,
       last_name: last.value,
-    }).eq('id', authUser.id)
+    }).eq('id', user.value.id)
     if (userUpdateError) throw userUpdateError
+
+    console.log('User name updated')
 
     // Also update Supabase Auth user metadata
     await supabase.auth.updateUser({
@@ -223,26 +207,28 @@ async function onSubmit() {
         display_name: `${first.value} ${last.value}`,
       }
     })
+    console.log('auth user updated')
 
-  let insertError
-    if (userRole.value === 'owner') {
-      // New company onboarding
-      const { data: companyData, error: companyError } = await supabase.from('companies').insert({
-        name: company.value,
-        sector: sector.value,
-        region_id: region_id.value,
-        regulation_profile_id: regulation_profile_id.value,
-        compliance_status: compliance.value,
-      }).select('id').maybeSingle()
-      insertError = companyError
-      companyId = companyData?.id || null
-      if (companyId) {
-        await supabase.from('user_companies').upsert({
-          user_id: authUser.id,
-          company_id: companyId,
-          role: 'owner',
-        })
-      }
+    // New company onboarding only
+    console.log(`company data to be inserted with name: ${company.value}\n sector: ${sector.value}, region_id: ${region_id.value}, regulation_profile_id: ${regulation_profile_id.value}, compliance_status: ${compliance.value}`)
+    let insertError
+    const { data: companyData, error: companyError } = await supabase.from('companies').insert({
+      name: company.value,
+      sector: sector.value,
+      region_id: region_id.value,
+      regulation_profile_id: regulation_profile_id.value,
+      compliance_status: compliance.value,
+    }).select('id').maybeSingle()
+    console.log(`company data inserted with ${companyData}`)
+    insertError = companyError
+    companyId = companyData?.id || null
+    console.log(`company id from company data: ${companyId}`)
+    if (companyId) {
+      await supabase.from('user_companies').upsert({
+        user_id: user.value.id,
+        company_id: companyId,
+        role: 'owner',
+      })
     }
     if (insertError) {
       error.value = insertError.message || 'Failed to save company profile.'
@@ -252,11 +238,10 @@ async function onSubmit() {
     error.value = ''
     await supabase.from('users').update({
       onboarding_complete: true
-    }).eq('id', authUser.id)
-    // Optionally, show a success notification here
-    setTimeout(() => {
-      router.push('/dashboard')
-    }, 500)
+    }).eq('id', user.value.id)
+
+    console.log('Form rendered')
+    router.push('/dashboard')
   } catch (err: any) {
     console.error('Submission error:', err)
     error.value = err?.message || 'An unexpected error occurred'

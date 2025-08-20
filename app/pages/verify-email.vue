@@ -10,7 +10,7 @@
         Once verified, please log in to continue onboarding.
       </div>
       <NuxtLink to="/login" class="w-full block mt-4">
-        <Button class="w-full bg-[#28A745] hover:bg-[#14532D]">Go to Login</Button>
+        <Button type="submit" class="w-full bg-[#28A745] hover:bg-[#14532D]">Go to Login</Button>
       </NuxtLink>
     </Card>
   </div>

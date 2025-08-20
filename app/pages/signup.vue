@@ -20,7 +20,7 @@
           <Label for="confirm">Confirm Password</Label>
           <Input id="confirm" v-model="confirm" type="password" placeholder="••••••••" required />
         </div>
-        <Button :disabled="loading" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white font-semibold py-2 rounded">
+        <Button type="submit" :disabled="loading" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white font-semibold py-2 rounded">
           <span v-if="loading"><IconLoader class="animate-spin w-4 h-4 inline mr-2" /></span>
           Sign Up
         </Button>

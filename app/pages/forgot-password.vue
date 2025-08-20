@@ -11,7 +11,7 @@
           <Label for="email">Email</Label>
           <Input id="email" v-model="email" type="email" placeholder="you@email.com" required autofocus />
         </div>
-        <Button :disabled="loading" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white font-semibold py-2 rounded">
+        <Button type="submit" :disabled="loading" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white font-semibold py-2 rounded">
           <span v-if="loading"><IconLoader class="animate-spin w-4 h-4 inline mr-2" /></span>
           Send Reset Link
         </Button>
