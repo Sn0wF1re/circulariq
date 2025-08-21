@@ -17,7 +17,7 @@
             <DialogTitle>Add New Product</DialogTitle>
             <DialogDescription>Enter product details for sustainability tracking</DialogDescription>
           </DialogHeader>
-          <form @submit.prevent="addProduct">
+          <form @submit.prevent="handleAddProduct">
             <div class="space-y-4">
               <div class="flex flex-col gap-1">
                 <Label for="product-name" class="block">Product Name</Label>
@@ -30,7 +30,9 @@
               <div class="flex flex-col gap-1">
                 <Label for="material" class="block">Material</Label>
                 <Select v-model="newProduct.material">
-                <SelectTrigger class="block w-full border border-gray-300 bg-white pl-3" />
+                  <SelectTrigger id="material" class="block w-full border border-gray-300 bg-white pl-3">
+                    <SelectValue placeholder="Select material" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="rPET">rPET</SelectItem>
                     <SelectItem value="PLA">PLA</SelectItem>
@@ -55,10 +57,10 @@
                 <Label for="reuse-pct" class="block">Reuse (%)</Label>
                 <Input id="reuse-pct" v-model.number="newProduct.reuse_pct" type="number" min="0" max="100" placeholder="Enter percentage" class="block w-full border border-gray-300 bg-white pl-3" />
               </div>
-              <button type="submit" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white py-2 rounded-lg flex items-center justify-center gap-2">
+              <Button type="submit" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white py-2 rounded-lg flex items-center justify-center gap-2">
                 <Plus class="w-4 h-4 mr-2" />
                 Add Product
-              </button>
+              </Button>
             </div>
           </form>
         </DialogContent>

@@ -80,7 +80,7 @@
           <Input id="sector" v-model="sector" placeholder="Technology" required />
         </div>
         <div class="flex flex-col gap-1">
-          <Label for="region">Region</Label>
+          <Label for="region-select">Region</Label>
           <Select v-model="region_id">
             <SelectTrigger id="region-select" class="w-full">
               <SelectValue placeholder="Select region" />
@@ -91,7 +91,7 @@
           </Select>          
         </div>
         <div class="flex flex-col gap-1">
-          <Label for="regulation">Regulation Profile</Label>
+          <Label for="regulation-profile">Regulation Profile</Label>
           <Select v-model="regulation_profile_id">
             <SelectTrigger id="regulation-profile" class="w-full">
               <SelectValue placeholder="Select regulation profile" />
@@ -102,7 +102,7 @@
           </Select>
         </div>
         <div class="flex flex-col gap-1">
-          <Label for="compliance">Compliance Status</Label>
+          <Label for="compliance-status">Compliance Status</Label>
           <Select v-model="compliance">
             <SelectTrigger id="compliance-status" class="w-full">
               <SelectValue placeholder="Select status" />
