@@ -30,7 +30,7 @@
               <div class="flex flex-col gap-1">
                 <Label for="material" class="block">Material</Label>
                 <Select v-model="newProduct.material">
-                  <SelectTrigger id="material" class="block w-full border border-gray-300 bg-white pl-3">
+                  <SelectTrigger id="material" class="w-full border border-gray-300 bg-white">
                     <SelectValue placeholder="Select material" />
                   </SelectTrigger>
                   <SelectContent>
