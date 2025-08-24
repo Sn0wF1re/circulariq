@@ -22,7 +22,7 @@
           </div>
           <NuxtLink to="/forgot-password" class="text-sm text-[#28A745] hover:underline">Forgot password?</NuxtLink>
         </div>
-  <Button type="submit" :disabled="loading" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white font-semibold py-2 rounded">
+        <Button type="submit" :disabled="loading" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white font-semibold py-2 rounded">
           <span v-if="loading"><IconLoader class="animate-spin w-4 h-4 inline mr-2" /></span>
           Sign In
         </Button>
@@ -54,16 +54,21 @@ const supabase = useSupabaseClient()
 async function onLogin() {
   loading.value = true
   error.value = ''
-  const { error: authError } = await supabase.auth.signInWithPassword({
+  const { data: userData, error: authError } = await supabase.auth.signInWithPassword({
     email: email.value,
     password: password.value,
   })
   loading.value = false
+
   if (authError) {
     error.value = authError.message || 'Login failed.'
     return
   }
-  router.push('/onboarding')
+
+  if (!userData.user.user_metadata.onboarding_complete) {
+    router.push('/onboarding')  
+  }
+  router.push('/dashboard')
 }
 </script>
 
