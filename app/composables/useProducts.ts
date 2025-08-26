@@ -8,15 +8,12 @@ const mockProducts = [
     sku_code: 'ECO-001',
     material: 'Recycled PET',
     weight_grams: 50,
+    recycled_weight: 40,
     recycled_pct: 80,
     recyclability_pct: 95,
     reuse_pct: 10,
     company_id: 'company-1',
-    compliance_score: {
-      overall_score: 88,
-      regulations_met: 10,
-      total_regulations: 12
-    }
+    circular_score: 88
   },
   {
     id: '2',
@@ -24,15 +21,12 @@ const mockProducts = [
     sku_code: 'GRN-002',
     material: 'Cardboard',
     weight_grams: 120,
+    recycled_weight: 80,
     recycled_pct: 60,
     recyclability_pct: 98,
     reuse_pct: 20,
     company_id: 'company-1',
-    compliance_score: {
-      overall_score: 72,
-      regulations_met: 8,
-      total_regulations: 12
-    }
+    circular_score: 72
   }
 ]
 
@@ -50,27 +44,13 @@ export function useProducts({ useMock = false } = {}) {
     loading.value = true
     error.value = null
     try {
-      // Fetch products
+      // Fetch products including circular_score
       const { data: productData, error: productsError } = await supabase
         .from('products')
         .select('*')
       if (productsError) throw productsError
-      const productIds = (productData || []).map(p => p.id)
-      // Fetch compliance scores for all products
-      const { data: scoresData, error: scoresError } = await supabase
-        .from('compliance_scores')
-        .select('product_id, overall_score, regulations_met, total_regulations')
-        .in('product_id', productIds)
-      if (scoresError) throw scoresError
-      // Map scores to products
-      const scoresMap = new Map()
-      for (const score of scoresData || []) {
-        scoresMap.set(score.product_id, score)
-      }
-      products.value = (productData || []).map(p => ({
-        ...p,
-        compliance_score: scoresMap.get(p.id) || { overall_score: 0, regulations_met: 0, total_regulations: 0 }
-      }))
+      products.value = productData || []
+      console.log('products: ', products.value)
     } catch (e: any) {
       error.value = e.message || 'Failed to fetch products'
       products.value = mockProducts
@@ -91,18 +71,27 @@ export function useProducts({ useMock = false } = {}) {
     loading.value = true
     error.value = null
     try {
-      // Insert product into products table
+      // Only send fields that exist in the products table schema
+      const validProduct = {
+        name: product.name,
+        sku_code: product.sku_code,
+        material: product.material,
+        weight_grams: product.weight_grams,
+        recycled_weight: product.recycled_weight,
+        recyclability_pct: product.recyclability_pct,
+        reuse_pct: product.reuse_pct,
+        company_id: product.company_id
+      }
       const { data: inserted, error: insertError } = await supabase
         .from('products')
-        .insert([product])
+        .insert([validProduct])
         .select()
         .maybeSingle()
       if (insertError) throw insertError
-      // Optionally, fetch compliance score for new product (if needed)
       // Add to products list
       products.value = [
         ...(products.value || []),
-        { ...inserted, compliance_score: { overall_score: 0, regulations_met: 0, total_regulations: 0 } }
+        inserted
       ]
       return { error: null }
     } catch (e: any) {
