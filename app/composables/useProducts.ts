@@ -79,10 +79,45 @@ export function useProducts({ useMock = false } = {}) {
     }
   }
 
+  async function addProduct(product: any) {
+    if (useMock) {
+      // Add to mock data
+      const newId = (mockProducts.length + 1).toString()
+      const newProduct = { ...product, id: newId }
+      mockProducts.push(newProduct)
+      products.value = [...mockProducts]
+      return { error: null }
+    }
+    loading.value = true
+    error.value = null
+    try {
+      // Insert product into products table
+      const { data: inserted, error: insertError } = await supabase
+        .from('products')
+        .insert([product])
+        .select()
+        .maybeSingle()
+      if (insertError) throw insertError
+      // Optionally, fetch compliance score for new product (if needed)
+      // Add to products list
+      products.value = [
+        ...(products.value || []),
+        { ...inserted, compliance_score: { overall_score: 0, regulations_met: 0, total_regulations: 0 } }
+      ]
+      return { error: null }
+    } catch (e: any) {
+      error.value = e.message || 'Failed to add product'
+      return { error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     products,
     loading,
     error,
-    fetchProducts
+    fetchProducts,
+    addProduct
   }
 }
