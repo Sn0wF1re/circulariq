@@ -210,8 +210,8 @@
               <td class="px-4 py-3">{{ product.recycled_pct }}%</td>
               <td class="px-4 py-3">{{ product.recyclability_pct }}%</td>
               <td class="px-4 py-3">
-                <span v-if="product.compliance_score && product.compliance_score.overall_score !== undefined">
-                  {{ product.compliance_score.overall_score }}%
+                <span v-if="typeof product.circular_score === 'number'">
+                  {{ product.circular_score.toFixed(1) }}%
                 </span>
                 <span v-else>-</span>
               </td>
