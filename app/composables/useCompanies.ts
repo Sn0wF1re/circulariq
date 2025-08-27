@@ -50,7 +50,7 @@ export function useCompanies({ useMock = false } = {}) {
       // Fetch compliance scores for all companies
       const { data: scoresData, error: scoresError } = await supabase
         .from('compliance_scores')
-        .select('company_id, regulation_profile_id, overall_score, regulations_met, total_regulations')
+        .select('company_id, overall_score')
         .in('company_id', companyIds)
       // Map scores by company_id
       const scoresMap = (scoresData || []).reduce((acc: any, score: any) => {
