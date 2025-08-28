@@ -174,14 +174,12 @@
           <div class="relative flex-1">
             <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
+              v-model="searchQuery"
               placeholder="Search products..."
               class="pl-10 border rounded-lg py-2 w-full"
+              type="text"
             />
           </div>
-          <button class="border px-4 py-2 rounded-lg flex items-center gap-2">
-            <Filter class="w-4 h-4 mr-2" />
-            Filter
-          </button>
         </div>
       </CardHeader>
       <CardContent>
@@ -199,7 +197,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="product in products" :key="product.id" class="hover:bg-gray-50 border-b border-gray-200 last:border-b-0">
+            <tr v-for="product in filteredProducts" :key="product.id" class="hover:bg-gray-50 border-b border-gray-200 last:border-b-0">
               <td class="font-medium flex items-center gap-2 px-4 py-3">
                 <Package class="w-4 h-4 text-green-700" />
                 {{ product.name }}
@@ -336,7 +334,20 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { Plus, Search, Filter, Package, Eye, Info, AlertCircle } from 'lucide-vue-next'
 
+
 const { products, addProduct, loading, error, fetchProducts, updateProduct, deleteProduct } = useProducts()
+
+// Search state
+const searchQuery = ref('')
+const filteredProducts = computed(() => {
+  if (!searchQuery.value.trim()) return products.value
+  const q = searchQuery.value.trim().toLowerCase()
+  return products.value.filter(p =>
+    (p.name && p.name.toLowerCase().includes(q)) ||
+    (p.sku_code && p.sku_code.toLowerCase().includes(q)) ||
+    (p.material && p.material.toLowerCase().includes(q))
+  )
+})
 
 // State for detail, edit, and delete dialogs
 const showDetailDialog = ref(false)
