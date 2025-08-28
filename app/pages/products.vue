@@ -216,15 +216,119 @@
                 <span v-else>-</span>
               </td>
               <td class="px-4 py-3">
-                <button class="text-blue-600 hover:underline flex items-center gap-1">
-                  <Eye class="w-4 h-4" /> View
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger as-child>
+                    <button class="border px-2 py-1 rounded flex items-center gap-1 hover:bg-gray-100">
+                      <span class="sr-only">Actions</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v.01M12 12v.01M12 18v.01" /></svg>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem @click="openDetail(product)">
+                      <Eye class="w-4 h-4 mr-2 text-blue-600" /> View
+                    </DropdownMenuItem>
+                    <DropdownMenuItem @click="openEdit(product)">
+                      <Package class="w-4 h-4 mr-2 text-yellow-600" /> Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem @click="confirmDelete(product)">
+                      <AlertCircle class="w-4 h-4 mr-2 text-red-600" /> Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </td>
             </tr>
-          </tbody>
+  </tbody>
         </table>
       </CardContent>
     </Card>
+
+    <!-- Detail View Dialog -->
+  <Dialog :open="showDetailDialog" @update:open="showDetailDialog = $event">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Product Details</DialogTitle>
+        </DialogHeader>
+        <div v-if="selectedProduct">
+          <div class="mb-2"><strong>Name:</strong> {{ selectedProduct.name }}</div>
+          <div class="mb-2"><strong>SKU:</strong> {{ selectedProduct.sku_code }}</div>
+          <div class="mb-2"><strong>Material:</strong> {{ selectedProduct.material }}</div>
+          <div class="mb-2"><strong>Weight:</strong> {{ selectedProduct.weight_grams }}g</div>
+          <div class="mb-2"><strong>Recycled %:</strong> {{ selectedProduct.recycled_pct }}%</div>
+          <div class="mb-2"><strong>Recyclability %:</strong> {{ selectedProduct.recyclability_pct }}%</div>
+          <div class="mb-2"><strong>Reuse %:</strong> {{ selectedProduct.reuse_pct }}%</div>
+          <div class="mb-2"><strong>Circular Score:</strong> <span v-if="typeof selectedProduct.circular_score === 'number'">{{ selectedProduct.circular_score.toFixed(1) }}%</span><span v-else>-</span></div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    <!-- Edit Product Dialog -->
+  <Dialog :open="showEditDialog" @update:open="showEditDialog = $event">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Product</DialogTitle>
+        </DialogHeader>
+        <form @submit.prevent="handleEditProduct">
+          <div class="space-y-4">
+            <div class="flex flex-col gap-1">
+              <Label for="edit-product-name" class="block">Product Name</Label>
+              <Input id="edit-product-name" v-model="editProduct.name" required class="w-full border border-gray-300 bg-white" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="edit-sku-code" class="block">SKU Code</Label>
+              <Input id="edit-sku-code" v-model="editProduct.sku_code" required class="w-full border border-gray-300 bg-white" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="edit-material" class="block">Material</Label>
+              <Select v-model="editProduct.material">
+                <SelectTrigger id="edit-material" class="w-full border border-gray-300 bg-white">
+                  <SelectValue placeholder="Select material" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rPET">rPET</SelectItem>
+                  <SelectItem value="PLA">PLA</SelectItem>
+                  <SelectItem value="HDPE">HDPE</SelectItem>
+                  <SelectItem value="PP">PP</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="edit-weight-grams" class="block">Weight (grams)</Label>
+              <Input id="edit-weight-grams" v-model.number="editProduct.weight_grams" type="number" min="1" required class="w-full border border-gray-300 bg-white" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="edit-recycled-weight" class="block">Recycled Content (grams)</Label>
+              <Input id="edit-recycled-weight" v-model.number="editProduct.recycled_weight" type="number" min="0" :max="editProduct.weight_grams" required class="w-full border border-gray-300 bg-white" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="edit-recyclability-pct" class="block">Recyclability (%)</Label>
+              <Input id="edit-recyclability-pct" v-model.number="editProduct.recyclability_pct" type="number" min="0" max="100" required class="w-full border border-gray-300 bg-white" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="edit-reuse-pct" class="block">Reuse (%)</Label>
+              <Input id="edit-reuse-pct" v-model.number="editProduct.reuse_pct" type="number" min="0" max="100" class="w-full border border-gray-300 bg-white" />
+            </div>
+            <Button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-700 text-white py-2 rounded-lg flex items-center justify-center gap-2">Save Changes</Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+
+    <!-- Delete Confirmation Dialog -->
+    <Dialog :open="showDeleteDialog" @update:open="showDeleteDialog = $event">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Product</DialogTitle>
+        </DialogHeader>
+        <div v-if="selectedProduct">
+          <p>Are you sure you want to delete <strong>{{ selectedProduct.name }}</strong>?</p>
+          <div class="flex gap-4 mt-4">
+            <Button class="bg-red-600 hover:bg-red-800 text-white" @click="handleDeleteProduct">Delete</Button>
+            <Button class="bg-gray-300 hover:bg-gray-400 text-black" @click="showDeleteDialog = false">Cancel</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  <!-- Dialogs are now at the root, after the Card -->
   </div>
 </template>
 
@@ -232,8 +336,51 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { Plus, Search, Filter, Package, Eye, Info, AlertCircle } from 'lucide-vue-next'
 
-const { products, addProduct, loading, error, fetchProducts } = useProducts()
+const { products, addProduct, loading, error, fetchProducts, updateProduct, deleteProduct } = useProducts()
 
+// State for detail, edit, and delete dialogs
+const showDetailDialog = ref(false)
+const showEditDialog = ref(false)
+const showDeleteDialog = ref(false)
+const selectedProduct = ref(null)
+const editProduct = ref({})
+
+function openDetail(product) {
+  selectedProduct.value = { ...product }
+  showDetailDialog.value = true
+}
+
+function openEdit(product) {
+  editProduct.value = { ...product }
+  showEditDialog.value = true
+}
+
+function confirmDelete(product) {
+  selectedProduct.value = { ...product }
+  showDeleteDialog.value = true
+}
+
+async function handleEditProduct() {
+  if (!editProduct.value.id) return
+  const { error: updateError } = await updateProduct(editProduct.value)
+  if (!updateError) {
+    showEditDialog.value = false
+    successMessage.value = 'Product updated successfully!'
+    fetchProducts()
+    setTimeout(() => { successMessage.value = '' }, 2500)
+  }
+}
+
+async function handleDeleteProduct() {
+  if (!selectedProduct.value?.id) return
+  const { error: deleteError } = await deleteProduct(selectedProduct.value.id)
+  if (!deleteError) {
+    showDeleteDialog.value = false
+    successMessage.value = 'Product deleted successfully!'
+    fetchProducts()
+    setTimeout(() => { successMessage.value = '' }, 2500)
+  }
+}
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 const successMessage = ref('')

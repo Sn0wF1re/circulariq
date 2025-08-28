@@ -54,7 +54,7 @@ export function useCompliance({ useMock = false } = {}) {
       const companyIds = (companyData || []).map(c => c.id)
       const { data: scoresData, error: scoresError } = await supabase
         .from('compliance_scores')
-        .select('company_id, regulation_profile_id, overall_score, regulations_met, total_regulations')
+        .select('company_id, overall_score')
         .in('company_id', companyIds)
       if (scoresError) throw scoresError
       // Map scores to companies

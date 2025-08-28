@@ -102,11 +102,78 @@ export function useProducts({ useMock = false } = {}) {
     }
   }
 
+  async function updateProduct(product: any) {
+    if (useMock) {
+      const idx = mockProducts.findIndex((p) => p.id === product.id)
+      if (idx !== -1) {
+        mockProducts[idx] = { ...mockProducts[idx], ...product }
+        products.value = [...mockProducts]
+      }
+      return { error: null }
+    }
+    loading.value = true
+    error.value = null
+    try {
+      const validProduct = {
+        name: product.name,
+        sku_code: product.sku_code,
+        material: product.material,
+        weight_grams: product.weight_grams,
+        recycled_weight: product.recycled_weight,
+        recyclability_pct: product.recyclability_pct,
+        reuse_pct: product.reuse_pct
+      }
+      const { error: updateError } = await supabase
+        .from('products')
+        .update(validProduct)
+        .eq('id', product.id)
+      if (updateError) throw updateError
+      // Update local list
+      await fetchProducts()
+      return { error: null }
+    } catch (e: any) {
+      error.value = e.message || 'Failed to update product'
+      return { error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function deleteProduct(productId: string) {
+    if (useMock) {
+      const idx = mockProducts.findIndex((p) => p.id === productId)
+      if (idx !== -1) {
+        mockProducts.splice(idx, 1)
+        products.value = [...mockProducts]
+      }
+      return { error: null }
+    }
+    loading.value = true
+    error.value = null
+    try {
+      const { error: deleteError } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId)
+      if (deleteError) throw deleteError
+      // Update local list
+      await fetchProducts()
+      return { error: null }
+    } catch (e: any) {
+      error.value = e.message || 'Failed to delete product'
+      return { error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     products,
     loading,
     error,
     fetchProducts,
-    addProduct
+    addProduct,
+    updateProduct,
+    deleteProduct
   }
 }
