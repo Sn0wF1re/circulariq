@@ -31,6 +31,38 @@ const mockProducts = [
 ]
 
 export function useProducts({ useMock = false } = {}) {
+  // Helper: Upsert a footprint report for a product
+  async function upsertFootprintReport(product: any) {
+    // Set reporting period to current month (YYYY-MM-01)
+    const now = new Date()
+    const reportingPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+
+    // Calculate total plastic kg (single unit)
+    const totalPlasticKg = product.weight_grams ? product.weight_grams / 1000 : 0
+
+    // Example emission factor lookup (customize as needed)
+    const emissionFactors = { rPET: 2.1, PLA: 1.8, HDPE: 2.5, PP: 2.3 }
+    const emissionsCo2e = totalPlasticKg * (emissionFactors[product.material as keyof typeof emissionFactors] || 2.0)
+
+    // Example footprint score (customize as needed)
+    const recycledPct = product.weight_grams ? (product.recycled_weight || 0) / product.weight_grams * 100 : 0
+    const footprintScore = Math.round(
+      (product.recyclability_pct || 0) * 0.4 +
+      recycledPct * 0.3 +
+      (product.reuse_pct || 0) * 0.2
+    )
+
+    await supabase.from('footprint_reports').upsert([
+      {
+        company_id: product.company_id,
+        product_id: product.id,
+        reporting_period: reportingPeriod,
+        total_plastic_kg: totalPlasticKg,
+        emissions_co2e: emissionsCo2e,
+        footprint_score: footprintScore
+      }
+    ], { onConflict: 'company_id,product_id,reporting_period' })
+  }
   const supabase = useSupabaseClient()
   const products = ref<any[]>([])
   const loading = ref(false)
@@ -93,6 +125,8 @@ export function useProducts({ useMock = false } = {}) {
         ...(products.value || []),
         inserted
       ]
+      // Upsert footprint report for this product
+      await upsertFootprintReport(inserted)
       return { error: null }
     } catch (e: any) {
       error.value = e.message || 'Failed to add product'
