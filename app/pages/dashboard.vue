@@ -68,11 +68,26 @@
 
     <!-- Charts Placeholder -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card class="flex items-center justify-center h-64">
-        <span class="text-gray-400">[Plastic Footprint Trend Chart]</span>
+      <Card class="flex flex-col items-center justify-center h-64 p-4">
+        <div class="w-full h-full">
+          <template v-if="trendData.length">
+            <canvas ref="trendChart" class="w-full h-56"></canvas>
+          </template>
+          <template v-else>
+            <span class="text-gray-400">No trend data available</span>
+          </template>
+        </div>
       </Card>
-      <Card>
-        <span class="text-gray-400">[Recent Alerts]</span>
+      <Card class="p-4">
+        <div class="font-semibold mb-2">Recent Alerts</div>
+        <ul v-if="alerts.length">
+          <li v-for="alert in alerts" :key="alert.id" class="mb-2 flex items-center gap-2">
+            <AlertTriangle class="w-4 h-4 text-yellow-700" />
+            <span>{{ alert.message }}</span>
+            <span class="text-xs text-gray-400 ml-auto">{{ new Date(alert.date).toLocaleDateString() }}</span>
+          </li>
+        </ul>
+        <span v-else class="text-gray-400">No recent alerts</span>
       </Card>
     </div>
   </div>
@@ -83,8 +98,64 @@ import { ref, watch, onMounted } from 'vue'
 import { Package as IconPackage, Recycle as IconRecycle, AlertTriangle as IconAlertTriangle, CheckCircle as IconCheckCircle, Building2 as IconBuilding2 } from 'lucide-vue-next'
 
 const { companies } = useCompanies()
-const { kpi, loading, error, fetchKpi } = useDashboardData()
+import { onUnmounted } from 'vue'
+import Chart from 'chart.js/auto'
+const { kpi, loading, error, fetchKpi, trendData, alerts } = useDashboardData()
 const selectedCompany = ref('')
+const trendChart = ref(null)
+let chartInstance = null
+
+function renderTrendChart() {
+  if (!trendChart.value || !trendData.value.length) return
+  if (chartInstance) {
+    chartInstance.destroy()
+    chartInstance = null
+  }
+  const ctx = trendChart.value.getContext('2d')
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: trendData.value.map(d => d.period),
+      datasets: [
+        {
+          label: 'Plastic Usage (kg)',
+          data: trendData.value.map(d => d.plastic),
+          borderColor: '#28A745',
+          backgroundColor: 'rgba(40,167,69,0.1)',
+          yAxisID: 'y1',
+        },
+        {
+          label: 'CO2e (tons)',
+          data: trendData.value.map(d => (d.co2e / 1000).toFixed(2)),
+          borderColor: '#FFC107',
+          backgroundColor: 'rgba(255,193,7,0.1)',
+          yAxisID: 'y2',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      stacked: false,
+      plugins: { legend: { position: 'top' } },
+      scales: {
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          title: { display: true, text: 'Plastic (kg)' }
+        },
+        y2: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          title: { display: true, text: 'CO2e (tons)' },
+          grid: { drawOnChartArea: false }
+        }
+      }
+    }
+  })
+}
 
 onMounted(() => {
   if (companies.value.length > 0) {
@@ -95,5 +166,13 @@ onMounted(() => {
 
 watch(selectedCompany, (newId) => {
   if (newId) fetchKpi(newId)
+})
+
+watch(trendData, () => {
+  renderTrendChart()
+})
+
+onUnmounted(() => {
+  if (chartInstance) chartInstance.destroy()
 })
 </script>
