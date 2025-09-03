@@ -164,6 +164,8 @@ export function useProducts({ useMock = false } = {}) {
       if (updateError) throw updateError
       // Update local list
       await fetchProducts()
+      // Upsert footprint report for this product (current period)
+      await upsertFootprintReport({ ...product, ...validProduct })
       return { error: null }
     } catch (e: any) {
       error.value = e.message || 'Failed to update product'
@@ -185,6 +187,12 @@ export function useProducts({ useMock = false } = {}) {
     loading.value = true
     error.value = null
     try {
+      // Delete related footprint_reports first
+      await supabase
+        .from('footprint_reports')
+        .delete()
+        .eq('product_id', productId)
+      // Then delete the product
       const { error: deleteError } = await supabase
         .from('products')
         .delete()
