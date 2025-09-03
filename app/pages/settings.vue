@@ -216,7 +216,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 
 // Multi-company management state
-const { companies, loading: companiesLoading, error: companiesError, refresh: refreshCompanies } = useCompanies({ useMock: false })
+const { companies, loading: companiesLoading, error: companiesError, refresh: refreshCompanies, addCompany } = useCompanies({ useMock: false })
 const activeCompanyId = ref<string | null>(null)
 const showAddCompany = ref(false)
 const requestCompany = ref(false)
@@ -254,11 +254,27 @@ async function onAddCompany() {
   }
 }
 
-function submitRequest() {
-  // TODO: Implement request logic (e.g., send to support or admin)
-  requestCompany.value = false
-  requestReason.value = ''
-  alert('Request submitted!')
+async function submitRequest() {
+  // Insert a notification for admin/support
+  try {
+    const supabase = useSupabaseClient()
+    const user = useSupabaseUser()
+    await supabase.from('notifications').insert([
+      {
+        user_id: user.value?.id,
+        company_id: null,
+        type: 'company_request',
+        message: `User ${user.value?.email || user.value?.id} requested a new company. Reason: ${requestReason.value}`,
+        read: false,
+        meta: { reason: requestReason.value }
+      }
+    ])
+    requestCompany.value = false
+    requestReason.value = ''
+    alert('Request submitted!')
+  } catch (e: any) {
+    alert('Failed to submit request: ' + (e.message || e))
+  }
 }
 
 const { settings, loading, error, refresh, updateSettings } = useSettings({ useMock: false })
