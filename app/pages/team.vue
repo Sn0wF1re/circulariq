@@ -158,17 +158,21 @@
                           </Select>
                         </div>
                         <div class="flex space-x-2">
-                          <Button class="flex-1 bg-[#28A745] hover:bg-[#14532D]">
+                          <Button class="flex-1 bg-[#28A745] hover:bg-[#14532D]" @click="updateTeamMember(user.id, { role: user.role })">
                             Update Role
                           </Button>
-                          <Button v-if="user.status === 'Pending'" variant="outline" class="flex-1">
-                            Resend Invite
+                          <Button v-if="user.status === 'Pending'" variant="outline" class="flex-1" @click="acceptInvite(user.id)">
+                            Accept Invite
+                          </Button>
+                          <Button v-if="user.status === 'Pending'" variant="outline" class="flex-1" @click="declineInvite(user.id)">
+                            Decline Invite
                           </Button>
                         </div>
                         <Button
                           v-if="user.id !== '1'"
                           variant="outline"
                           class="w-full text-red-600 border-red-300 hover:bg-red-50"
+                          @click="removeTeamMember(user.id)"
                         >
                           Remove User
                         </Button>
@@ -188,7 +192,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { UserPlus as IconUserPlus, Mail as IconMail, Users as IconUsers, Shield as IconShield, Search as IconSearch, Filter as IconFilter, MoreVertical as IconMoreVertical } from 'lucide-vue-next'
-const { team, loading, error, refresh, updateTeamMember } = useTeam({ useMock: false })
+const { team, loading, error, refresh, updateTeamMember, acceptInvite, declineInvite, removeTeamMember } = useTeam({ useMock: false })
 
 const searchTerm = ref('')
 
