@@ -57,7 +57,38 @@ export function useTeam({ useMock = false, companyId = null } = {}) {
     }
   }
 
-  // Optionally, fetch on composable use
+  // Accept a pending invite (set status to Active)
+  async function acceptInvite(id: string) {
+    await updateTeamMember(id, { status: 'Active' })
+  }
+
+  // Decline a pending invite (remove from team)
+  async function declineInvite(id: string) {
+    await removeTeamMember(id)
+  }
+
+  // Remove a team member
+  async function removeTeamMember(id: string) {
+    loading.value = true
+    error.value = null
+    try {
+      if (useMock) {
+        team.value = team.value.filter(u => u.id !== id)
+        return
+      }
+      const { error: deleteError } = await supabase
+        .from('team')
+        .delete()
+        .eq('id', id)
+      if (deleteError) throw deleteError
+      await fetchTeam()
+    } catch (e: any) {
+      error.value = e.message || 'Failed to remove team member.'
+    } finally {
+      loading.value = false
+    }
+  }
+
   fetchTeam()
 
   return {
@@ -66,5 +97,8 @@ export function useTeam({ useMock = false, companyId = null } = {}) {
     error,
     refresh: fetchTeam,
     updateTeamMember,
+    acceptInvite,
+    declineInvite,
+    removeTeamMember,
   }
 }
