@@ -97,42 +97,6 @@
           <Button class="bg-[#28A745] hover:bg-[#14532D]" @click="updateUserProfile">
             Update Account
           </Button>
-import { useSupabaseClient, useSupabaseUser } from '#imports'
-const supabase = useSupabaseClient()
-const user = useSupabaseUser()
-
-// User profile state
-const profile = ref({
-  full_name: user.value?.user_metadata?.full_name || '',
-  email: user.value?.email || '',
-  phone: user.value?.phone || '',
-  timezone: 'utc',
-})
-
-async function updateUserProfile() {
-  try {
-    // Update auth user (email, phone)
-    if (profile.value.email !== user.value?.email) {
-      const { error } = await supabase.auth.updateUser({ email: profile.value.email })
-      if (error) throw error
-    }
-    if (profile.value.phone && profile.value.phone !== user.value?.phone) {
-      const { error } = await supabase.auth.updateUser({ phone: profile.value.phone })
-      if (error) throw error
-    }
-    // Update user_metadata (full_name, timezone)
-    const { error: metaError } = await supabase.auth.updateUser({
-      data: {
-        full_name: profile.value.full_name,
-        timezone: profile.value.timezone
-      }
-    })
-    if (metaError) throw metaError
-    alert('Profile updated!')
-  } catch (e: any) {
-    alert('Failed to update profile: ' + (e.message || e))
-  }
-}
         </CardContent>
       </Card>
       <!-- Company Settings Card -->
@@ -252,6 +216,8 @@ async function updateUserProfile() {
 import { ref, computed, watch, onMounted } from 'vue'
 
 // Multi-company management state
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 const { companies, loading: companiesLoading, error: companiesError, refresh: refreshCompanies, addCompany } = useCompanies({ useMock: false })
 const activeCompanyId = ref<string | null>(null)
 const showAddCompany = ref(false)
@@ -290,11 +256,44 @@ async function onAddCompany() {
   }
 }
 
+// User profile state
+const profile = ref({
+  full_name: user.value?.user_metadata?.full_name || '',
+  email: user.value?.email || '',
+  phone: user.value?.phone || '',
+  timezone: 'utc',
+})
+
+async function updateUserProfile() {
+  try {
+    // Update auth user (email, phone)
+    if (profile.value.email !== user.value?.email) {
+      const { error } = await supabase.auth.updateUser({ email: profile.value.email })
+      if (error) throw error
+    }
+    if (profile.value.phone && profile.value.phone !== user.value?.phone) {
+      const { error } = await supabase.auth.updateUser({ phone: profile.value.phone })
+      if (error) throw error
+    }
+    // Update user_metadata (full_name, timezone)
+    const { error: metaError } = await supabase.auth.updateUser({
+      data: {
+        full_name: profile.value.full_name,
+        timezone: profile.value.timezone
+      }
+    })
+    if (metaError) throw metaError
+    alert('Profile updated!')
+  } catch (e: any) {
+    alert('Failed to update profile: ' + (e.message || e))
+  }
+}
+
 async function submitRequest() {
   // Insert a notification for admin/support
   try {
-    const supabase = useSupabaseClient()
-    const user = useSupabaseUser()
+    // const supabase = useSupabaseClient()
+    // const user = useSupabaseUser()
     await supabase.from('notifications').insert([
       {
         user_id: user.value?.id,
