@@ -77,10 +77,48 @@ export function useCompanies({ useMock = false } = {}) {
 
   onMounted(fetchCompanies)
 
+  // Add a new company and link user as owner
+  async function addCompany(company: any) {
+    loading.value = true
+    error.value = null
+    try {
+      // 1. Insert company
+      const { data: newCompany, error: companyError } = await supabase
+        .from('companies')
+        .insert([{
+          name: company.name,
+          sector: company.sector,
+          region_id: company.region_id,
+          regulation_profile_id: company.regulation_profile_id
+        }])
+        .select()
+        .maybeSingle()
+      if (companyError) throw companyError
+      // 2. Link user as owner
+      const { error: linkError } = await supabase
+        .from('user_companies')
+        .insert([{
+          user_id: user.value.id,
+          company_id: newCompany.id,
+          role: 'owner'
+        }])
+      if (linkError) throw linkError
+      // 3. Refresh companies
+      await fetchCompanies()
+      return { error: null, company: newCompany }
+    } catch (e: any) {
+      error.value = e.message || 'Failed to add company'
+      return { error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     companies,
     loading,
     error,
-    refresh: fetchCompanies
+    refresh: fetchCompanies,
+    addCompany
   }
 }

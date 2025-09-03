@@ -244,11 +244,14 @@ const isAdminOrOwner = computed(() => {
   return role === 'admin' || role === 'owner' || role === 'Admin' || role === 'Owner'
 })
 
-function onAddCompany() {
-  // TODO: Implement real company creation logic (Supabase insert)
-  companies.value.push({ ...newCompany.value, id: Math.random().toString(36).slice(2), role: 'owner' })
-  showAddCompany.value = false
-  newCompany.value = { name: '', sector: '', region_id: '', regulation_profile_id: '' }
+async function onAddCompany() {
+  const { error } = await addCompany(newCompany.value)
+  if (!error) {
+    showAddCompany.value = false
+    newCompany.value = { name: '', sector: '', region_id: '', regulation_profile_id: '' }
+  } else {
+    alert('Failed to create company: ' + error)
+  }
 }
 
 function submitRequest() {
