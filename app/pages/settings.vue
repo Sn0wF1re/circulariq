@@ -70,19 +70,19 @@
         <CardContent class="space-y-4">
           <div>
             <Label for="full-name">Full Name</Label>
-            <Input id="full-name" placeholder="John Smith" />
+            <Input id="full-name" v-model="profile.full_name" placeholder="John Smith" />
           </div>
           <div>
             <Label for="email">Email Address</Label>
-            <Input id="email" type="email" placeholder="john.smith@ecotech.com" />
+            <Input id="email" v-model="profile.email" type="email" placeholder="john.smith@ecotech.com" />
           </div>
           <div>
             <Label for="phone">Phone Number</Label>
-            <Input id="phone" type="tel" placeholder="+1 (555) 123-4567" />
+            <Input id="phone" v-model="profile.phone" type="tel" placeholder="+1 (555) 123-4567" />
           </div>
           <div>
             <Label for="timezone">Timezone</Label>
-            <Select>
+            <Select v-model="profile.timezone">
               <SelectTrigger>
                 <SelectValue placeholder="Select timezone" />
               </SelectTrigger>
@@ -94,9 +94,45 @@
               </SelectContent>
             </Select>
           </div>
-          <Button class="bg-[#28A745] hover:bg-[#14532D]">
+          <Button class="bg-[#28A745] hover:bg-[#14532D]" @click="updateUserProfile">
             Update Account
           </Button>
+import { useSupabaseClient, useSupabaseUser } from '#imports'
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
+
+// User profile state
+const profile = ref({
+  full_name: user.value?.user_metadata?.full_name || '',
+  email: user.value?.email || '',
+  phone: user.value?.phone || '',
+  timezone: 'utc',
+})
+
+async function updateUserProfile() {
+  try {
+    // Update auth user (email, phone)
+    if (profile.value.email !== user.value?.email) {
+      const { error } = await supabase.auth.updateUser({ email: profile.value.email })
+      if (error) throw error
+    }
+    if (profile.value.phone && profile.value.phone !== user.value?.phone) {
+      const { error } = await supabase.auth.updateUser({ phone: profile.value.phone })
+      if (error) throw error
+    }
+    // Update user_metadata (full_name, timezone)
+    const { error: metaError } = await supabase.auth.updateUser({
+      data: {
+        full_name: profile.value.full_name,
+        timezone: profile.value.timezone
+      }
+    })
+    if (metaError) throw metaError
+    alert('Profile updated!')
+  } catch (e: any) {
+    alert('Failed to update profile: ' + (e.message || e))
+  }
+}
         </CardContent>
       </Card>
       <!-- Company Settings Card -->
