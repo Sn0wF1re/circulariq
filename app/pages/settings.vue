@@ -26,9 +26,9 @@
                   </SelectContent>
                 </Select>
               </div>
-              <Button @click="showAddCompany = true" class="bg-[#28A745] hover:bg-[#14532D] h-10 md:mb-0 md:ml-2">Add Company</Button>
+              <Button v-if="isAdminOrOwner" @click="showAddCompany = true" class="bg-[#28A745] hover:bg-[#14532D] h-10 md:mb-0 md:ml-2">Add Company</Button>
             </div>
-            <div v-if="activeCompany">
+            <div v-if="activeCompany && isAdminOrOwner">
               <p class="mt-2 text-sm text-gray-600">Sector: {{ activeCompany.sector }} | Region: {{ getRegionName(activeCompany.region_id) }}</p>
               <p class="text-sm text-gray-600">Compliance: {{ activeCompany.compliance_status?.status || activeCompany.compliance_status }}</p>
             </div>
@@ -182,29 +182,31 @@
           <CardDescription>Configure your organization details</CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">
-          <div class="flex flex-col gap-1">
-            <Label for="company-name">Company Name</Label>
-            <Input id="company-name" v-model="companyName" placeholder="EcoTech Solutions" />
+          <div v-if="isAdminOrOwner">
+            <div class="flex flex-col gap-1">
+              <Label for="company-name">Company Name</Label>
+              <Input id="company-name" v-model="companyName" placeholder="EcoTech Solutions" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="sector">Sector</Label>
+              <Input id="sector" v-model="sector" placeholder="Technology" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="region">Region</Label>
+              <Input id="region" v-model="region_id" placeholder="North America" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="regulation-profile">Regulation Profile</Label>
+              <Input id="regulation-profile" v-model="regulation_profile_id" placeholder="EU Packaging" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="compliance-status">Compliance Status</Label>
+              <Input id="compliance-status" v-model="complianceStatus" placeholder="Compliant" />
+            </div>
+            <Button class="bg-[#28A745] hover:bg-[#14532D]">
+              Update Company
+            </Button>
           </div>
-          <div class="flex flex-col gap-1">
-            <Label for="sector">Sector</Label>
-            <Input id="sector" v-model="sector" placeholder="Technology" />
-          </div>
-          <div class="flex flex-col gap-1">
-            <Label for="region">Region</Label>
-            <Input id="region" v-model="region_id" placeholder="North America" />
-          </div>
-          <div class="flex flex-col gap-1">
-            <Label for="regulation-profile">Regulation Profile</Label>
-            <Input id="regulation-profile" v-model="regulation_profile_id" placeholder="EU Packaging" />
-          </div>
-          <div class="flex flex-col gap-1">
-            <Label for="compliance-status">Compliance Status</Label>
-            <Input id="compliance-status" v-model="complianceStatus" placeholder="Compliant" />
-          </div>
-          <Button class="bg-[#28A745] hover:bg-[#14532D]">
-            Update Company
-          </Button>
         </CardContent>
       </Card>
     </div>

@@ -5,7 +5,7 @@
         <h2 class="text-2xl font-bold">Team Management</h2>
         <p class="text-gray-600">Manage users and their access permissions</p>
       </div>
-      <Dialog>
+      <Dialog v-if="canManageTeam">
         <DialogTrigger asChild>
           <Button class="bg-[#28A745] hover:bg-[#14532D]">
             <IconUserPlus class="w-4 h-4 mr-2" />
@@ -130,7 +130,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ user.last_login }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <Dialog>
+                  <Dialog v-if="canManageTeam">
                     <DialogTrigger asChild>
                       <Button variant="outline" size="sm">
                         <IconMoreVertical class="w-3 h-3" />
@@ -192,7 +192,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { UserPlus as IconUserPlus, Mail as IconMail, Users as IconUsers, Shield as IconShield, Search as IconSearch, Filter as IconFilter, MoreVertical as IconMoreVertical } from 'lucide-vue-next'
+
 const { team, loading, error, refresh, updateTeamMember, acceptInvite, declineInvite, removeTeamMember } = useTeam({ useMock: false })
+const user = useSupabaseUser()
+const currentUser = computed(() => team.value.find(u => u.email === user.value?.email))
+const canManageTeam = computed(() => {
+  const role = currentUser.value?.role
+  return role === 'Admin' || role === 'Owner' || role === 'admin' || role === 'owner'
+})
 
 const searchTerm = ref('')
 
