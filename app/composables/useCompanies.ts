@@ -1,4 +1,3 @@
-
 // ---- 1. Mock Data (matches Supabase schema) ----
 const mockCompany = {
   id: 'mock-uuid',
@@ -13,6 +12,8 @@ const mockCompany = {
     total_regulations: 12
   }
 }
+
+import { useAuditLog } from './useAuditLog'
 
 export function useCompanies({ useMock = false } = {}) {
   const supabase = useSupabaseClient()
@@ -103,7 +104,14 @@ export function useCompanies({ useMock = false } = {}) {
           role: 'owner'
         }])
       if (linkError) throw linkError
-      // 3. Refresh companies
+      // 3. Audit log
+      await useAuditLog({
+        action: 'add_company',
+        target_id: newCompany.id,
+        target_table: 'companies',
+        meta: company
+      })
+      // 4. Refresh companies
       await fetchCompanies()
       return { error: null, company: newCompany }
     } catch (e: any) {
