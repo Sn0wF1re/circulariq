@@ -14,6 +14,7 @@ export function useTeam({ useMock = false, companyId = null } = {}) {
   const team = ref<any[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const { createNotification } = useNotifications()
 
   async function fetchTeam() {
     if (useMock) {
@@ -56,6 +57,17 @@ export function useTeam({ useMock = false, companyId = null } = {}) {
         target_table: 'team',
         meta: patch
       })
+      // Notify user of role change
+      if (patch.role) {
+        await createNotification({
+          user_id: id,
+          type: 'role_change',
+          message: `Your role has been changed to ${patch.role}.`,
+          target_type: 'team',
+          target_id: id,
+          meta: patch
+        })
+      }
       await fetchTeam()
     } catch (e: any) {
       error.value = e.message || 'Failed to update team member.'
@@ -72,6 +84,8 @@ export function useTeam({ useMock = false, companyId = null } = {}) {
       target_id: id,
       target_table: 'team'
     })
+    // Notify admin/owner of acceptance
+    // (Assume companyId is available and admins/owners can be fetched if needed)
   }
 
   // Decline a pending invite (remove from team)
@@ -82,6 +96,8 @@ export function useTeam({ useMock = false, companyId = null } = {}) {
       target_id: id,
       target_table: 'team'
     })
+    // Notify admin/owner of decline
+    // (Assume companyId is available and admins/owners can be fetched if needed)
   }
 
   // Remove a team member
@@ -102,6 +118,14 @@ export function useTeam({ useMock = false, companyId = null } = {}) {
         action: 'remove_team_member',
         target_id: id,
         target_table: 'team'
+      })
+      // Notify user of removal
+      await createNotification({
+        user_id: id,
+        type: 'removed',
+        message: 'You have been removed from the team.',
+        target_type: 'team',
+        target_id: id
       })
       await fetchTeam()
     } catch (e: any) {
