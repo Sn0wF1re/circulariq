@@ -18,6 +18,7 @@ import { useAuditLog } from './useAuditLog'
 export function useCompanies({ useMock = false } = {}) {
   const supabase = useSupabaseClient()
   const user = useSupabaseUser()
+  const { createNotification } = useNotifications()
 
   const companies = ref<any[]>([])
   const loading = ref(false)
@@ -111,6 +112,15 @@ export function useCompanies({ useMock = false } = {}) {
         target_table: 'companies',
         meta: company
       })
+      // 3b. Notify creator
+      await createNotification({
+        user_id: user.value.id,
+        type: 'company_created',
+        message: `Company '${company.name}' was created successfully.`,
+        target_type: 'companies',
+        target_id: newCompany.id,
+        meta: company
+      })
       // 4. Refresh companies
       await fetchCompanies()
       return { error: null, company: newCompany }
@@ -138,6 +148,24 @@ export function useCompanies({ useMock = false } = {}) {
         target_table: 'companies',
         meta: patch
       })
+      // Notify all admins/owners of the company
+      const { data: admins } = await supabase
+        .from('user_companies')
+        .select('user_id')
+        .eq('company_id', companyId)
+        .in('role', ['admin', 'owner', 'Admin', 'Owner'])
+      if (admins && Array.isArray(admins)) {
+        for (const admin of admins) {
+          await createNotification({
+            user_id: admin.user_id,
+            type: 'company_updated',
+            message: `Company details were updated.`,
+            target_type: 'companies',
+            target_id: companyId,
+            meta: patch
+          })
+        }
+      }
       await fetchCompanies()
       return { error: null }
     } catch (e: any) {
@@ -163,6 +191,23 @@ export function useCompanies({ useMock = false } = {}) {
         target_id: companyId,
         target_table: 'companies'
       })
+      // Notify all admins/owners of the company
+      const { data: admins } = await supabase
+        .from('user_companies')
+        .select('user_id')
+        .eq('company_id', companyId)
+        .in('role', ['admin', 'owner', 'Admin', 'Owner'])
+      if (admins && Array.isArray(admins)) {
+        for (const admin of admins) {
+          await createNotification({
+            user_id: admin.user_id,
+            type: 'company_deleted',
+            message: `Company was deleted.`,
+            target_type: 'companies',
+            target_id: companyId
+          })
+        }
+      }
       await fetchCompanies()
       return { error: null }
     } catch (e: any) {
