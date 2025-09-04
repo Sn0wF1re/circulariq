@@ -122,11 +122,64 @@ export function useCompanies({ useMock = false } = {}) {
     }
   }
 
+  // Update an existing company
+  async function updateCompany(companyId: string, patch: any) {
+    loading.value = true
+    error.value = null
+    try {
+      const { error: updateError } = await supabase
+        .from('companies')
+        .update(patch)
+        .eq('id', companyId)
+      if (updateError) throw updateError
+      await useAuditLog({
+        action: 'update_company',
+        target_id: companyId,
+        target_table: 'companies',
+        meta: patch
+      })
+      await fetchCompanies()
+      return { error: null }
+    } catch (e: any) {
+      error.value = e.message || 'Failed to update company'
+      return { error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Delete a company
+  async function deleteCompany(companyId: string) {
+    loading.value = true
+    error.value = null
+    try {
+      const { error: deleteError } = await supabase
+        .from('companies')
+        .delete()
+        .eq('id', companyId)
+      if (deleteError) throw deleteError
+      await useAuditLog({
+        action: 'delete_company',
+        target_id: companyId,
+        target_table: 'companies'
+      })
+      await fetchCompanies()
+      return { error: null }
+    } catch (e: any) {
+      error.value = e.message || 'Failed to delete company'
+      return { error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     companies,
     loading,
     error,
     refresh: fetchCompanies,
-    addCompany
+    addCompany,
+    updateCompany,
+    deleteCompany
   }
 }
