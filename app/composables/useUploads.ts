@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { useAuditLog } from './useAuditLog'
 
 // ---- 1. Mock Data ----
 const mockUploadHistory = [
@@ -71,6 +72,12 @@ export function useUploads({ useMock = false, companyId = null } = {}) {
         status: 'Processing',
         uploaded_at: 'just now',
       })
+      // Audit log
+      await useAuditLog({
+        action: 'upload_file',
+        target_table: 'uploads',
+        meta: { filename: file.name },
+      })
     } catch (e: any) {
       error.value = e.message || 'Failed to upload file.'
     } finally {
@@ -87,6 +94,12 @@ export function useUploads({ useMock = false, companyId = null } = {}) {
         return
       }
       // Implement actual add logic here (e.g., insert into products table)
+      // Audit log
+      await useAuditLog({
+        action: 'upload_add_product',
+        target_table: 'products',
+        meta: product,
+      })
     } catch (e: any) {
       error.value = e.message || 'Failed to add product.'
     } finally {
