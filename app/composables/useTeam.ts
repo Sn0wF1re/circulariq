@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { useAuditLog } from './useAuditLog'
 
 // ---- 1. Mock Data ----
 const mockTeam = [
@@ -49,6 +50,12 @@ export function useTeam({ useMock = false, companyId = null } = {}) {
         .update(patch)
         .eq('id', id)
       if (updateError) throw updateError
+      await useAuditLog({
+        action: 'update_team_member',
+        target_id: id,
+        target_table: 'team',
+        meta: patch
+      })
       await fetchTeam()
     } catch (e: any) {
       error.value = e.message || 'Failed to update team member.'
@@ -60,11 +67,21 @@ export function useTeam({ useMock = false, companyId = null } = {}) {
   // Accept a pending invite (set status to Active)
   async function acceptInvite(id: string) {
     await updateTeamMember(id, { status: 'Active' })
+    await useAuditLog({
+      action: 'accept_invite',
+      target_id: id,
+      target_table: 'team'
+    })
   }
 
   // Decline a pending invite (remove from team)
   async function declineInvite(id: string) {
     await removeTeamMember(id)
+    await useAuditLog({
+      action: 'decline_invite',
+      target_id: id,
+      target_table: 'team'
+    })
   }
 
   // Remove a team member
@@ -81,6 +98,11 @@ export function useTeam({ useMock = false, companyId = null } = {}) {
         .delete()
         .eq('id', id)
       if (deleteError) throw deleteError
+      await useAuditLog({
+        action: 'remove_team_member',
+        target_id: id,
+        target_table: 'team'
+      })
       await fetchTeam()
     } catch (e: any) {
       error.value = e.message || 'Failed to remove team member.'
