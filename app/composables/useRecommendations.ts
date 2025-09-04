@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { useAuditLog } from './useAuditLog'
 
 // ---- 1. Mock Data ----
 const mockRecommendations = [
@@ -73,6 +74,12 @@ export function useRecommendations({ useMock = false } = {}) {
       // Optionally update the local recommendation object
       const rec = recommendations.value.find(r => r.id === id)
       if (rec) rec.implemented = true
+      // Audit log
+      await useAuditLog({
+        action: 'implement_recommendation',
+        target_id: id,
+        target_table: 'recommendations'
+      })
     } catch (e: any) {
       error.value = e.message || 'Failed to update recommendation.'
     } finally {
