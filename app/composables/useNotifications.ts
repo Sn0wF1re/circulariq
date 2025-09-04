@@ -70,10 +70,80 @@ export function useNotifications({ useMock = false } = {}) {
 
   const notificationsToShow = computed(() => notifications.value.length ? notifications.value : mockNotifications)
 
+  async function markAsRead(notificationId: string) {
+    loading.value = true
+    error.value = null
+    try {
+      const { error: updateError } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', notificationId)
+      if (updateError) throw updateError
+      await fetchNotifications()
+    } catch (e: any) {
+      error.value = e.message || 'Failed to mark notification as read.'
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function createNotification({ user_id, company_id, type, message, target_type, target_id, meta }: {
+    user_id: string,
+    company_id?: string,
+    type?: string,
+    message: string,
+    target_type?: string,
+    target_id?: string,
+    meta?: any
+  }) {
+    loading.value = true
+    error.value = null
+    try {
+      const { error: insertError } = await supabase
+        .from('notifications')
+        .insert({
+          user_id,
+          company_id,
+          type,
+          message,
+          target_type,
+          target_id,
+          meta,
+          read: false
+        })
+      if (insertError) throw insertError
+      await fetchNotifications()
+    } catch (e: any) {
+      error.value = e.message || 'Failed to create notification.'
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function deleteNotification(notificationId: string) {
+    loading.value = true
+    error.value = null
+    try {
+      const { error: deleteError } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', notificationId)
+      if (deleteError) throw deleteError
+      await fetchNotifications()
+    } catch (e: any) {
+      error.value = e.message || 'Failed to delete notification.'
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     notifications: notificationsToShow,
     loading,
     error,
-    refresh: fetchNotifications
+    refresh: fetchNotifications,
+    markAsRead,
+    createNotification,
+    deleteNotification
   }
 }
