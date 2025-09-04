@@ -15,10 +15,7 @@
           </div>
           <div class="flex items-center space-x-4">
             <!-- Example user actions, can be replaced with actual logic -->
-            <NuxtLink to="/notifications" class="border rounded px-3 py-1 flex items-center gap-2 text-gray-700 hover:bg-gray-100 font-medium">
-              <IconBell class="w-4 h-4" />
-              Notifications
-            </NuxtLink>
+            <NotificationDropdown class="ml-2" />
             <NuxtLink to="/settings" class="border rounded px-3 py-1 flex items-center gap-2 text-gray-700 hover:bg-gray-100 font-medium">
               <IconSettings class="w-4 h-4" />
               Settings
@@ -96,8 +93,7 @@
             Data Upload
           </NuxtLink>
 
-          <!-- Notification Dropdown -->
-          <NotificationDropdown class="ml-4" />
+
         </div>
       </Tabs>
     </div>
