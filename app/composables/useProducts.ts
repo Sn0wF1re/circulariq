@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { useAuditLog } from './useAuditLog'
 
 // ---- 1. Mock Data ----
 const mockProducts = [
@@ -127,6 +128,13 @@ export function useProducts({ useMock = false } = {}) {
       ]
       // Upsert footprint report for this product
       await upsertFootprintReport(inserted)
+      // Audit log
+      await useAuditLog({
+        action: 'add_product',
+        target_id: inserted.id,
+        target_table: 'products',
+        meta: validProduct
+      })
       return { error: null }
     } catch (e: any) {
       error.value = e.message || 'Failed to add product'
@@ -166,6 +174,13 @@ export function useProducts({ useMock = false } = {}) {
       await fetchProducts()
       // Upsert footprint report for this product (current period)
       await upsertFootprintReport({ ...product, ...validProduct })
+      // Audit log
+      await useAuditLog({
+        action: 'update_product',
+        target_id: product.id,
+        target_table: 'products',
+        meta: validProduct
+      })
       return { error: null }
     } catch (e: any) {
       error.value = e.message || 'Failed to update product'
@@ -200,6 +215,12 @@ export function useProducts({ useMock = false } = {}) {
       if (deleteError) throw deleteError
       // Update local list
       await fetchProducts()
+      // Audit log
+      await useAuditLog({
+        action: 'delete_product',
+        target_id: productId,
+        target_table: 'products'
+      })
       return { error: null }
     } catch (e: any) {
       error.value = e.message || 'Failed to delete product'
