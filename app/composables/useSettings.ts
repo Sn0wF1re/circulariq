@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { useAuditLog } from './useAuditLog'
 
 // ---- 1. Mock Data ----
 const mockSettings = {
@@ -71,6 +72,12 @@ export function useSettings({ useMock = false, companyId = null } = {}) {
         .update(patch)
         .eq('company_id', companyId)
       if (updateError) throw updateError
+      await useAuditLog({
+        action: 'update_settings',
+        target_id: companyId ? String(companyId) : undefined,
+        target_table: 'company_settings',
+        meta: patch
+      })
       await fetchSettings()
     } catch (e: any) {
       error.value = e.message || 'Failed to update settings.'
