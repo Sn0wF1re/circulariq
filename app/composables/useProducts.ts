@@ -68,6 +68,7 @@ export function useProducts({ useMock = false } = {}) {
   const products = ref<any[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const { createNotification } = useNotifications()
 
   async function fetchProducts() {
     if (useMock) {
@@ -135,6 +136,24 @@ export function useProducts({ useMock = false } = {}) {
         target_table: 'products',
         meta: validProduct
       })
+      // Notify all admins/owners of the company
+      const { data: admins } = await supabase
+        .from('user_companies')
+        .select('user_id')
+        .eq('company_id', inserted.company_id)
+        .in('role', ['admin', 'owner', 'Admin', 'Owner'])
+      if (admins && Array.isArray(admins)) {
+        for (const admin of admins) {
+          await createNotification({
+            user_id: admin.user_id,
+            type: 'product_added',
+            message: `A new product '${inserted.name}' was added.`,
+            target_type: 'products',
+            target_id: inserted.id,
+            meta: validProduct
+          })
+        }
+      }
       return { error: null }
     } catch (e: any) {
       error.value = e.message || 'Failed to add product'
@@ -181,6 +200,24 @@ export function useProducts({ useMock = false } = {}) {
         target_table: 'products',
         meta: validProduct
       })
+      // Notify all admins/owners of the company
+      const { data: admins } = await supabase
+        .from('user_companies')
+        .select('user_id')
+        .eq('company_id', product.company_id)
+        .in('role', ['admin', 'owner', 'Admin', 'Owner'])
+      if (admins && Array.isArray(admins)) {
+        for (const admin of admins) {
+          await createNotification({
+            user_id: admin.user_id,
+            type: 'product_updated',
+            message: `Product '${product.name}' was updated.`,
+            target_type: 'products',
+            target_id: product.id,
+            meta: validProduct
+          })
+        }
+      }
       return { error: null }
     } catch (e: any) {
       error.value = e.message || 'Failed to update product'
@@ -221,6 +258,31 @@ export function useProducts({ useMock = false } = {}) {
         target_id: productId,
         target_table: 'products'
       })
+      // Notify all admins/owners of the company
+      // Need to fetch product to get company_id and name
+      const { data: product } = await supabase
+        .from('products')
+        .select('company_id, name')
+        .eq('id', productId)
+        .maybeSingle()
+      if (product && product.company_id) {
+        const { data: admins } = await supabase
+          .from('user_companies')
+          .select('user_id')
+          .eq('company_id', product.company_id)
+          .in('role', ['admin', 'owner', 'Admin', 'Owner'])
+        if (admins && Array.isArray(admins)) {
+          for (const admin of admins) {
+            await createNotification({
+              user_id: admin.user_id,
+              type: 'product_deleted',
+              message: `Product '${product.name}' was deleted.`,
+              target_type: 'products',
+              target_id: productId
+            })
+          }
+        }
+      }
       return { error: null }
     } catch (e: any) {
       error.value = e.message || 'Failed to delete product'
