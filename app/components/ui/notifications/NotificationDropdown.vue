@@ -42,10 +42,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Bell as IconBell, Check as IconCheck, Trash as IconTrash } from 'lucide-vue-next'
-import { useNotifications } from '@/app/composables/useNotifications'
-import { Button } from '@/app/components/ui/button'
-import { Card, CardContent } from '@/app/components/ui/card'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from '@/app/components/ui/dropdown-menu'
 
 const { notifications, markAsRead, deleteNotification, refresh } = useNotifications({ useMock: false })
 

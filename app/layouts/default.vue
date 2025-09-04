@@ -95,6 +95,9 @@
             <IconUpload class="w-4 h-4" />
             Data Upload
           </NuxtLink>
+
+          <!-- Notification Dropdown -->
+          <NotificationDropdown class="ml-4" />
         </div>
       </Tabs>
     </div>
@@ -105,6 +108,7 @@
     </main>
   </div>
 </template>
+
 
 <script setup>
 import { ref } from 'vue'
