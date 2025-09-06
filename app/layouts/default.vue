@@ -14,8 +14,8 @@
             </div>
           </div>
           <div class="flex items-center space-x-4">
-            <!-- Example user actions, can be replaced with actual logic -->
-            <NotificationDropdown class="ml-2" />
+            <!-- Notification Dropdown in header -->
+            <NotificationDropdown />
             <NuxtLink to="/settings" class="border rounded px-3 py-1 flex items-center gap-2 text-gray-700 hover:bg-gray-100 font-medium">
               <IconSettings class="w-4 h-4" />
               Settings
@@ -92,8 +92,6 @@
             <IconUpload class="w-4 h-4" />
             Data Upload
           </NuxtLink>
-
-
         </div>
       </Tabs>
     </div>
@@ -109,7 +107,6 @@
 <script setup>
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { NuxtLink } from '#components'
 import { Bell as IconBell, Settings as IconSettings, LogOut as IconLogOut, BarChart3 as IconBarChart3, Package as IconPackage, FileText as IconFileText, CheckCircle as IconCheckCircle, TrendingUp as IconTrendingUp, Upload as IconUpload, CreditCard as IconCreditCard, Users as IconUsers } from 'lucide-vue-next'
 
 const route = useRoute()

@@ -35,15 +35,22 @@
           </Card>
         </div>
       </div>
+      <div class="px-4 py-2 border-t text-center">
+        <Button variant="link" class="w-full" @click="goToNotifications">
+          View all
+        </Button>
+      </div>
     </DropdownMenuContent>
   </DropdownMenu>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { Bell as IconBell, Check as IconCheck, Trash as IconTrash } from 'lucide-vue-next'
 
 const { notifications, markAsRead, deleteNotification, refresh } = useNotifications({ useMock: false })
+const router = useRouter()
 
 const unreadCount = computed(() => notifications.value.filter(n => !n.read).length)
 
@@ -62,6 +69,10 @@ async function markAllAsRead() {
     await markAsRead(notif.id)
   }
   await refresh()
+}
+
+function goToNotifications() {
+  router.push('/notifications')
 }
 </script>
 
