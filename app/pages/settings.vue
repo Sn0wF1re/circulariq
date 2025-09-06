@@ -68,31 +68,33 @@
           <CardDescription>Update your personal details</CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">
-          <div>
-            <Label for="full-name">Full Name</Label>
-            <Input id="full-name" v-model="profile.full_name" placeholder="John Smith" />
-          </div>
-          <div>
-            <Label for="email">Email Address</Label>
-            <Input id="email" v-model="profile.email" type="email" placeholder="john.smith@ecotech.com" />
-          </div>
-          <div>
-            <Label for="phone">Phone Number</Label>
-            <Input id="phone" v-model="profile.phone" type="tel" placeholder="+1 (555) 123-4567" />
-          </div>
-          <div>
-            <Label for="timezone">Timezone</Label>
-            <Select v-model="profile.timezone">
-              <SelectTrigger>
-                <SelectValue placeholder="Select timezone" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pst">Pacific Standard Time</SelectItem>
-                <SelectItem value="est">Eastern Standard Time</SelectItem>
-                <SelectItem value="utc">UTC</SelectItem>
-                <SelectItem value="cet">Central European Time</SelectItem>
-              </SelectContent>
-            </Select>
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-1">
+              <Label for="full-name">Full Name</Label>
+              <Input id="full-name" v-model="profile.full_name" placeholder="John Smith" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="email">Email Address</Label>
+              <Input id="email" v-model="profile.email" type="email" placeholder="john.smith@ecotech.com" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="phone">Phone Number</Label>
+              <Input id="phone" v-model="profile.phone" type="tel" placeholder="+1 (555) 123-4567" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="timezone">Timezone</Label>
+              <Select v-model="profile.timezone">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select timezone" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pst">Pacific Standard Time</SelectItem>
+                  <SelectItem value="est">Eastern Standard Time</SelectItem>
+                  <SelectItem value="utc">UTC</SelectItem>
+                  <SelectItem value="cet">Central European Time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <Button class="bg-[#28A745] hover:bg-[#14532D]" @click="updateUserProfile">
             Update Account

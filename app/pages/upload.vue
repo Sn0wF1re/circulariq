@@ -15,41 +15,43 @@
           <CardDescription>Add a single product using a form</CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">
-          <div>
-            <Label for="individual-product-name">Product Name</Label>
-            <Input id="individual-product-name" v-model="form.name" placeholder="Enter product name" />
-          </div>
-          <div>
-            <Label for="individual-sku">SKU Code</Label>
-            <Input id="individual-sku" v-model="form.sku" placeholder="Enter SKU code" />
-          </div>
-          <div>
-            <Label for="individual-material">Material Type</Label>
-            <Select v-model="form.material">
-              <SelectTrigger>
-                <SelectValue placeholder="Select material" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pet">PET</SelectItem>
-                <SelectItem value="rpet">rPET</SelectItem>
-                <SelectItem value="pla">PLA</SelectItem>
-                <SelectItem value="hdpe">HDPE</SelectItem>
-                <SelectItem value="pp">PP</SelectItem>
-                <SelectItem value="ps">PS</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label for="individual-weight">Weight (grams)</Label>
-            <Input id="individual-weight" v-model="form.weight" type="number" placeholder="Enter weight in grams" />
-          </div>
-          <div>
-            <Label for="individual-recycled">Recycled Content (%)</Label>
-            <Input id="individual-recycled" v-model="form.recycled_pct" type="number" min="0" max="100" placeholder="Enter percentage" />
-          </div>
-          <div>
-            <Label for="individual-recyclability">Recyclability (%)</Label>
-            <Input id="individual-recyclability" v-model="form.recyclability_pct" type="number" min="0" max="100" placeholder="Enter percentage" />
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-1">
+              <Label for="individual-product-name">Product Name</Label>
+              <Input id="individual-product-name" v-model="form.name" placeholder="Enter product name" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="individual-sku">SKU Code</Label>
+              <Input id="individual-sku" v-model="form.sku" placeholder="Enter SKU code" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="individual-material">Material Type</Label>
+              <Select v-model="form.material">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select material" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pet">PET</SelectItem>
+                  <SelectItem value="rpet">rPET</SelectItem>
+                  <SelectItem value="pla">PLA</SelectItem>
+                  <SelectItem value="hdpe">HDPE</SelectItem>
+                  <SelectItem value="pp">PP</SelectItem>
+                  <SelectItem value="ps">PS</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="individual-weight">Weight (grams)</Label>
+              <Input id="individual-weight" v-model="form.weight" type="number" placeholder="Enter weight in grams" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="individual-recycled">Recycled Content (%)</Label>
+              <Input id="individual-recycled" v-model="form.recycled_pct" type="number" min="0" max="100" placeholder="Enter percentage" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label for="individual-recyclability">Recyclability (%)</Label>
+              <Input id="individual-recyclability" v-model="form.recyclability_pct" type="number" min="0" max="100" placeholder="Enter percentage" />
+            </div>
           </div>
           <Button class="w-full bg-[#28A745] hover:bg-[#14532D]" @click="addProduct">
             <Icon name="plus" class="w-4 h-4 mr-2" />
