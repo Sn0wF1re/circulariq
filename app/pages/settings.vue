@@ -113,15 +113,16 @@
                 <p class="font-medium">Data Analytics</p>
                 <p class="text-sm text-gray-600">Help improve our platform with usage analytics</p>
               </div>
-              <input type="checkbox" class="rounded" checked />
+              <input type="checkbox" class="rounded" v-model="analytics" />
             </div>
             <div class="flex items-center justify-between">
               <div>
                 <p class="font-medium">Marketing Communications</p>
                 <p class="text-sm text-gray-600">Receive updates about new features</p>
               </div>
-              <input type="checkbox" class="rounded" />
+              <input type="checkbox" class="rounded" v-model="marketing" />
             </div>
+            <Button class="mt-2 bg-[#28A745] hover:bg-[#14532D]" @click="updatePrivacySettings">Save Privacy Settings</Button>
           </div>
           <Separator />
           <div class="space-y-3">
@@ -145,8 +146,8 @@
           <div>
             <p class="font-medium mb-2">API Key</p>
             <div class="flex items-center space-x-2">
-              <Input value="pk_test_51J..." readonly class="font-mono" />
-              <Button variant="outline" size="sm">
+              <Input :value="apiKey" readonly class="font-mono" />
+              <Button variant="outline" size="sm" @click="copyApiKey">
                 Copy
               </Button>
             </div>
@@ -156,19 +157,13 @@
           <div>
             <p class="font-medium mb-3">Connected Apps</p>
             <div class="space-y-2">
-              <div class="flex items-center justify-between p-3 border rounded-lg">
+              <div v-for="app in connectedApps" :key="app.name" class="flex items-center justify-between p-3 border rounded-lg">
                 <div>
-                  <p class="font-medium">Salesforce</p>
-                  <p class="text-sm text-gray-600">CRM integration</p>
+                  <p class="font-medium">{{ app.name }}</p>
+                  <p class="text-sm text-gray-600">{{ app.name === 'Salesforce' ? 'CRM integration' : app.name === 'SAP' ? 'ERP system' : '' }}</p>
                 </div>
-                <Badge class="bg-green-100 text-green-800">Connected</Badge>
-              </div>
-              <div class="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <p class="font-medium">SAP</p>
-                  <p class="text-sm text-gray-600">ERP system</p>
-                </div>
-                <Button variant="outline" size="sm">
+                <Badge v-if="app.status === 'connected'" class="bg-green-100 text-green-800">Connected</Badge>
+                <Button v-else variant="outline" size="sm">
                   Connect
                 </Button>
               </div>
@@ -203,7 +198,7 @@
               <Label for="compliance-status">Compliance Status</Label>
               <Input id="compliance-status" v-model="complianceStatus" placeholder="Compliant" />
             </div>
-            <Button class="bg-[#28A745] hover:bg-[#14532D]">
+            <Button class="bg-[#28A745] hover:bg-[#14532D]" @click="updateCompanySettings">
               Update Company
             </Button>
           </div>
@@ -214,6 +209,14 @@
 </template>
 
 <script setup lang="ts">
+function copyApiKey() {
+  const key = typeof apiKey === 'string' ? apiKey : apiKey?.value;
+  if (key) {
+    window.navigator.clipboard.writeText(key)
+      .then(() => alert('API key copied!'))
+      .catch(() => alert('Failed to copy API key.'));
+  }
+}
 
 import { ref, computed, watch, onMounted } from 'vue'
 
@@ -316,26 +319,58 @@ async function submitRequest() {
 
 const { settings, loading, error, refresh, updateSettings } = useSettings({ useMock: false })
 
-// v-models for company fields (matching schema)
+// v-models for company fields (from settings)
 const companyName = computed({
-  get: () => activeCompany.value?.name || '',
-  set: v => { if (activeCompany.value) activeCompany.value.name = v }
+  get: () => settings.value?.company?.name || '',
+  set: v => { if (settings.value?.company) settings.value.company.name = v }
 })
 const sector = computed({
-  get: () => activeCompany.value?.sector || '',
-  set: v => { if (activeCompany.value) activeCompany.value.sector = v }
+  get: () => settings.value?.company?.sector || '',
+  set: v => { if (settings.value?.company) settings.value.company.sector = v }
 })
 const region_id = computed({
-  get: () => activeCompany.value?.region_id || '',
-  set: v => { if (activeCompany.value) activeCompany.value.region_id = v }
+  get: () => settings.value?.company?.region_id || '',
+  set: v => { if (settings.value?.company) settings.value.company.region_id = v }
 })
 const regulation_profile_id = computed({
-  get: () => activeCompany.value?.regulation_profile_id || '',
-  set: v => { if (activeCompany.value) activeCompany.value.regulation_profile_id = v }
+  get: () => settings.value?.company?.regulation_profile_id || '',
+  set: v => { if (settings.value?.company) settings.value.company.regulation_profile_id = v }
 })
 const { getRegionName, getRegulationProfileName } = useRegionAndRegulationNames()
 const complianceStatus = computed({
-  get: () => activeCompany.value?.compliance_status || '',
-  set: v => { if (activeCompany.value) activeCompany.value.compliance_status = v }
+  get: () => settings.value?.company?.compliance_status || '',
+  set: v => { if (settings.value?.company) settings.value.company.compliance_status = v }
 })
+
+// Privacy settings
+const analytics = computed({
+  get: () => settings.value?.privacy?.analytics ?? false,
+  set: v => { if (settings.value?.privacy) settings.value.privacy.analytics = v }
+})
+const marketing = computed({
+  get: () => settings.value?.privacy?.marketing ?? false,
+  set: v => { if (settings.value?.privacy) settings.value.privacy.marketing = v }
+})
+
+// API key
+const apiKey = computed(() => settings.value?.api?.key || '')
+const connectedApps = computed(() => settings.value?.api?.connected_apps || [])
+
+// Update company settings
+async function updateCompanySettings() {
+  await updateSettings({ company: settings.value.company })
+  alert('Company settings updated!')
+}
+
+// Update privacy settings
+async function updatePrivacySettings() {
+  await updateSettings({ privacy: settings.value.privacy })
+  alert('Privacy settings updated!')
+}
+
+// Update API settings (for future expansion)
+async function updateApiSettings() {
+  await updateSettings({ api: settings.value.api })
+  alert('API settings updated!')
+}
 </script>
