@@ -152,11 +152,11 @@
     <div class="mt-6">
       <h3 class="text-lg font-bold mb-2">Usage Alerts</h3>
       <p class="text-gray-600 mb-4">Monitor your plan limits</p>
-      <div v-if="usageAlerts.length > 0" class="space-y-3">
+      <div v-if="usageAlerts.length > 0" class="flex flex-col gap-4">
         <div
           v-for="(alert, index) in usageAlerts"
           :key="index"
-          class="flex items-start gap-3 p-4 rounded-lg bg-yellow-50 mb-0"
+          class="flex items-start gap-3 p-4 rounded-lg bg-yellow-50"
         >
           <IconAlertTriangle class="w-6 h-6 text-yellow-500 mt-1 flex-shrink-0" />
           <div>
