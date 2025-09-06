@@ -11,20 +11,28 @@
         <CardHeader>
           <CardTitle>Recent Notifications</CardTitle>
           <CardDescription>Latest updates and alerts from your account</CardDescription>
+          <Button v-if="unreadCount > 0" variant="outline" size="sm" @click="markAllAsRead">Mark all as read</Button>
         </CardHeader>
         <CardContent class="space-y-4">
-          <template v-for="(notification, i) in notifications" :key="i">
+          <div v-if="notifications.length === 0" class="p-4 text-center text-gray-500">
+            No notifications
+          </div>
+          <template v-else v-for="notif in notifications" :key="notif.id">
             <div
               class="flex items-start space-x-3 p-4 rounded-lg"
-              :class="notification.bg"
+              :class="[!notif.read ? 'bg-blue-50' : 'bg-white']"
             >
-              <div :class="['w-2 h-2 rounded-full mt-2 flex-shrink-0', notification.dot]"></div>
+              <span v-if="!notif.read" class="w-2 h-2 rounded-full bg-blue-500 mt-2"></span>
               <div class="flex-1">
-                <p class="font-medium">{{ notification.title }}</p>
-                <p class="text-sm text-gray-600">{{ notification.description }}</p>
-                <p class="text-xs text-gray-400 mt-1">{{ notification.time }}</p>
+                <p class="font-medium">{{ notif.message }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ formatTime(notif.created_at) }}</p>
               </div>
-              <Button v-if="notification.action" variant="outline" size="sm">{{ notification.action }}</Button>
+              <Button v-if="!notif.read" variant="ghost" size="icon" @click="markAsRead(notif.id)">
+                <IconCheck class="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="icon" @click="deleteNotification(notif.id)">
+                <IconTrash class="w-4 h-4 text-red-500" />
+              </Button>
             </div>
           </template>
         </CardContent>
@@ -85,7 +93,25 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
+import { Check as IconCheck, Trash as IconTrash } from 'lucide-vue-next'
+const { notifications, markAsRead, deleteNotification, refresh } = useNotifications()
+const unreadCount = computed(() => notifications.value.filter(n => !n.read).length)
 
-const { notifications, loading, error, refresh } = useNotifications()
+function formatTime(dateStr: string) {
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diff = (now.getTime() - date.getTime()) / 1000
+  if (diff < 60) return 'just now'
+  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`
+  return date.toLocaleDateString()
+}
+
+async function markAllAsRead() {
+  for (const notif of notifications.value.filter(n => !n.read)) {
+    await markAsRead(notif.id)
+  }
+  await refresh()
+}
 </script>
