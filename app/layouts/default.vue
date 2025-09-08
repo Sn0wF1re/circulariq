@@ -3,9 +3,10 @@
     <!-- Header -->
     <header class="bg-white border-b border-gray-200 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
+        <!-- Desktop Header -->
+        <div class="hidden md:flex justify-between items-center h-16">
           <div class="flex items-center space-x-3">
-            <div class="flex items-center justify-center w-10 h-10 rounded-lg"> <!--  bg-[#28A745] -->
+            <div class="flex items-center justify-center w-10 h-10 rounded-lg">
               <img src="/logo.png" alt="CircularIQ Logo" class="w-6 h-6" />
             </div>
             <div>
@@ -14,27 +15,62 @@
             </div>
           </div>
           <div class="flex items-center space-x-4">
-            <!-- Notification Dropdown in header -->
             <NotificationDropdown />
             <NuxtLink to="/settings" class="border rounded px-3 py-1 flex items-center gap-2 text-gray-700 hover:bg-gray-100 font-medium">
-              <IconSettings class="w-4 h-4" />
-              Settings
+              <IconSettings class="w-4 h-4" /> Settings
             </NuxtLink>
             <NuxtLink to="/billing" class="border rounded px-3 py-1 flex items-center gap-2 text-gray-700 hover:bg-gray-100 font-medium">
-              <IconCreditCard class="w-4 h-4" />
-              Billing
+              <IconCreditCard class="w-4 h-4" /> Billing
             </NuxtLink>
             <NuxtLink to="/team" class="border rounded px-3 py-1 flex items-center gap-2 text-gray-700 hover:bg-gray-100 font-medium">
-              <IconUsers class="w-4 h-4" />
-              Team
+              <IconUsers class="w-4 h-4" /> Team
             </NuxtLink>
-            <button
-              class="border rounded px-3 py-1 flex items-center gap-2 text-red-600 border-red-300 hover:bg-red-50 font-medium"
-              @click="handleLogout"
-            >
-              <IconLogOut class="w-4 h-4" />
-              Logout
+            <button class="border rounded px-3 py-1 flex items-center gap-2 text-red-600 border-red-300 hover:bg-red-50 font-medium" @click="handleLogout">
+              <IconLogOut class="w-4 h-4" /> Logout
             </button>
+          </div>
+        </div>
+        <!-- Mobile Header -->
+        <div class="md:hidden flex flex-col py-2">
+          <div class="flex items-center w-full justify-between">
+            <!-- Left: Logo, Title, Subtitle stacked vertically -->
+            <div class="flex flex-col items-start gap-0">
+              <img src="/logo.png" alt="CircularIQ Logo" class="w-7 h-7 mb-1" />
+              <span class="font-bold text-base text-gray-900 leading-tight">CircularIQ</span>
+              <span class="text-xs text-gray-500 leading-tight">Sustainability Compliance Platform</span>
+            </div>
+            <!-- Right: Notification, Hamburger -->
+            <div class="flex items-center gap-3">
+              <NotificationDropdown />
+              <Sheet v-slot="{ open, close }">
+                <SheetTrigger as-child>
+                  <button class="p-2 rounded-lg border border-gray-200 bg-white flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                  </button>
+                </SheetTrigger>
+                <SheetContent side="right" class="w-64 flex flex-col items-end">
+                  <SheetHeader class="w-full">
+                    <SheetTitle class="w-full text-right">
+                      <span class="text-xs text-gray-500">Sustainability Compliance Platform</span>
+                    </SheetTitle>
+                  </SheetHeader>
+                  <nav class="flex flex-col gap-4 mt-4 w-full items-end">
+                    <NuxtLink to="/settings" class="flex items-center gap-2 text-gray-700 hover:text-green-700 justify-end w-full" @click="close">
+                      <IconSettings class="w-4 h-4" /> Settings
+                    </NuxtLink>
+                    <NuxtLink to="/billing" class="flex items-center gap-2 text-gray-700 hover:text-green-700 justify-end w-full" @click="close">
+                      <IconCreditCard class="w-4 h-4" /> Billing
+                    </NuxtLink>
+                    <NuxtLink to="/team" class="flex items-center gap-2 text-gray-700 hover:text-green-700 justify-end w-full" @click="close">
+                      <IconUsers class="w-4 h-4" /> Team
+                    </NuxtLink>
+                    <button class="flex items-center gap-2 text-red-600 hover:text-red-800 justify-end w-full" @click="handleLogout; close()">
+                      <IconLogOut class="w-4 h-4" /> Logout
+                    </button>
+                  </nav>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
       </div>
