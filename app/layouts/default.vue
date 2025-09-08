@@ -42,58 +42,90 @@
 
     <!-- Tabs Navigation -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <Tabs v-model="activeTab" class="space-y-6">
-        <div class="grid w-full grid-cols-6 bg-white rounded-t-lg overflow-hidden">
-          <NuxtLink
-            to="/dashboard"
-            class="flex items-center gap-2 px-4 py-2 transition-colors justify-center text-sm font-medium border-b-2 border-transparent"
-            :class="route.path === '/dashboard' ? 'bg-[#28A745] text-white border-[#28A745]' : 'hover:bg-gray-50 text-gray-900'"
-          >
-            <IconBarChart3 class="w-4 h-4" />
-            Dashboard
-          </NuxtLink>
-          <NuxtLink
-            to="/products"
-            class="flex items-center gap-2 px-4 py-2 transition-colors justify-center text-sm font-medium border-b-2 border-transparent"
-            :class="route.path === '/products' ? 'bg-[#28A745] text-white border-[#28A745]' : 'hover:bg-gray-50 text-gray-900'"
-          >
-            <IconPackage class="w-4 h-4" />
-            Products
-          </NuxtLink>
-          <NuxtLink
-            to="/reports"
-            class="flex items-center gap-2 px-4 py-2 transition-colors justify-center text-sm font-medium border-b-2 border-transparent"
-            :class="route.path === '/reports' ? 'bg-[#28A745] text-white border-[#28A745]' : 'hover:bg-gray-50 text-gray-900'"
-          >
-            <IconFileText class="w-4 h-4" />
-            Reports
-          </NuxtLink>
-          <NuxtLink
-            to="/compliance"
-            class="flex items-center gap-2 px-4 py-2 transition-colors justify-center text-sm font-medium border-b-2 border-transparent"
-            :class="route.path === '/compliance' ? 'bg-[#28A745] text-white border-[#28A745]' : 'hover:bg-gray-50 text-gray-900'"
-          >
-            <IconCheckCircle class="w-4 h-4" />
-            Compliance
-          </NuxtLink>
-          <NuxtLink
-            to="/recommendations"
-            class="flex items-center gap-2 px-4 py-2 transition-colors justify-center text-sm font-medium border-b-2 border-transparent"
-            :class="route.path === '/recommendations' ? 'bg-[#28A745] text-white border-[#28A745]' : 'hover:bg-gray-50 text-gray-900'"
-          >
-            <IconTrendingUp class="w-4 h-4" />
-            AI Insights
-          </NuxtLink>
-          <NuxtLink
-            to="/upload"
-            class="flex items-center gap-2 px-4 py-2 transition-colors justify-center text-sm font-medium border-b-2 border-transparent"
-            :class="route.path === '/upload' ? 'bg-[#28A745] text-white border-[#28A745]' : 'hover:bg-gray-50 text-gray-900'"
-          >
-            <IconUpload class="w-4 h-4" />
-            Data Upload
-          </NuxtLink>
-        </div>
-      </Tabs>
+      <!-- Desktop Tabs -->
+      <div class="hidden md:grid grid-cols-6 w-full bg-white rounded-t-lg overflow-hidden">
+        <NuxtLink
+          to="/dashboard"
+          class="flex items-center gap-2 px-4 py-2 transition-colors justify-center text-sm font-medium border-b-2 border-transparent"
+          :class="route.path === '/dashboard' ? 'bg-[#28A745] text-white border-[#28A745]' : 'hover:bg-gray-50 text-gray-900'"
+        >
+          <IconBarChart3 class="w-4 h-4" /> Dashboard
+        </NuxtLink>
+        <NuxtLink
+          to="/products"
+          class="flex items-center gap-2 px-4 py-2 transition-colors justify-center text-sm font-medium border-b-2 border-transparent"
+          :class="route.path === '/products' ? 'bg-[#28A745] text-white border-[#28A745]' : 'hover:bg-gray-50 text-gray-900'"
+        >
+          <IconPackage class="w-4 h-4" /> Products
+        </NuxtLink>
+        <NuxtLink
+          to="/reports"
+          class="flex items-center gap-2 px-4 py-2 transition-colors justify-center text-sm font-medium border-b-2 border-transparent"
+          :class="route.path === '/reports' ? 'bg-[#28A745] text-white border-[#28A745]' : 'hover:bg-gray-50 text-gray-900'"
+        >
+          <IconFileText class="w-4 h-4" /> Reports
+        </NuxtLink>
+        <NuxtLink
+          to="/compliance"
+          class="flex items-center gap-2 px-4 py-2 transition-colors justify-center text-sm font-medium border-b-2 border-transparent"
+          :class="route.path === '/compliance' ? 'bg-[#28A745] text-white border-[#28A745]' : 'hover:bg-gray-50 text-gray-900'"
+        >
+          <IconCheckCircle class="w-4 h-4" /> Compliance
+        </NuxtLink>
+        <NuxtLink
+          to="/recommendations"
+          class="flex items-center gap-2 px-4 py-2 transition-colors justify-center text-sm font-medium border-b-2 border-transparent"
+          :class="route.path === '/recommendations' ? 'bg-[#28A745] text-white border-[#28A745]' : 'hover:bg-gray-50 text-gray-900'"
+        >
+          <IconTrendingUp class="w-4 h-4" /> AI Insights
+        </NuxtLink>
+        <NuxtLink
+          to="/upload"
+          class="flex items-center gap-2 px-4 py-2 transition-colors justify-center text-sm font-medium border-b-2 border-transparent"
+          :class="route.path === '/upload' ? 'bg-[#28A745] text-white border-[#28A745]' : 'hover:bg-gray-50 text-gray-900'"
+        >
+          <IconUpload class="w-4 h-4" /> Data Upload
+        </NuxtLink>
+      </div>
+      <!-- Mobile Dropdown Tabs -->
+      <div class="md:hidden w-full">
+        <DropdownMenu>
+          <DropdownMenuTrigger as-child>
+            <button class="w-full flex items-center justify-between px-4 py-2 border rounded-lg bg-white text-gray-700">
+              <span>
+                <template v-if="route.path === '/dashboard'"><IconBarChart3 class="w-4 h-4 mr-2" /> Dashboard</template>
+                <template v-else-if="route.path === '/products'"><IconPackage class="w-4 h-4 mr-2" /> Products</template>
+                <template v-else-if="route.path === '/reports'"><IconFileText class="w-4 h-4 mr-2" /> Reports</template>
+                <template v-else-if="route.path === '/compliance'"><IconCheckCircle class="w-4 h-4 mr-2" /> Compliance</template>
+                <template v-else-if="route.path === '/recommendations'"><IconTrendingUp class="w-4 h-4 mr-2" /> AI Insights</template>
+                <template v-else-if="route.path === '/upload'"><IconUpload class="w-4 h-4 mr-2" /> Data Upload</template>
+                <template v-else>Choose Tab</template>
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent class="w-full">
+            <DropdownMenuItem @click="router.push('/dashboard')" :class="{ 'bg-green-100 font-bold': route.path === '/dashboard' }">
+              <IconBarChart3 class="w-4 h-4 mr-2" /> Dashboard
+            </DropdownMenuItem>
+            <DropdownMenuItem @click="router.push('/products')" :class="{ 'bg-green-100 font-bold': route.path === '/products' }">
+              <IconPackage class="w-4 h-4 mr-2" /> Products
+            </DropdownMenuItem>
+            <DropdownMenuItem @click="router.push('/reports')" :class="{ 'bg-green-100 font-bold': route.path === '/reports' }">
+              <IconFileText class="w-4 h-4 mr-2" /> Reports
+            </DropdownMenuItem>
+            <DropdownMenuItem @click="router.push('/compliance')" :class="{ 'bg-green-100 font-bold': route.path === '/compliance' }">
+              <IconCheckCircle class="w-4 h-4 mr-2" /> Compliance
+            </DropdownMenuItem>
+            <DropdownMenuItem @click="router.push('/recommendations')" :class="{ 'bg-green-100 font-bold': route.path === '/recommendations' }">
+              <IconTrendingUp class="w-4 h-4 mr-2" /> AI Insights
+            </DropdownMenuItem>
+            <DropdownMenuItem @click="router.push('/upload')" :class="{ 'bg-green-100 font-bold': route.path === '/upload' }">
+              <IconUpload class="w-4 h-4 mr-2" /> Data Upload
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
 
     <!-- Main Content Slot -->
