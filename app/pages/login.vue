@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-[#EFFBF0] px-2">
-    <Card class="w-full max-w-xs md:max-w-lg md:min-w-[350px] p-4 md:p-8 shadow-lg bg-white rounded-xl">
+  <div class="min-h-screen flex items-center justify-center bg-[#EFFBF0] px-2 overflow-y-auto">
+    <Card class="w-full max-w-sm md:max-w-lg md:min-w-[350px] p-4 md:p-8 shadow-lg bg-white rounded-xl">
       <CardHeader class="mb-6 text-center">
         <IconLock class="mx-auto w-10 h-10 text-[#28A745] mb-2" />
         <CardTitle class="text-2xl font-bold">Sign In</CardTitle>
