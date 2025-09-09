@@ -1,58 +1,59 @@
 <template>
-  <div class="space-y-6 p-6">
-    <div>
-      <h2 class="text-2xl font-bold">Billing & Plans</h2>
-      <p class="text-gray-600">Manage your subscription and usage</p>
+  <div class="flex flex-col gap-4 w-full p-4 md:p-6">
+    <!-- Header -->
+    <div class="mb-2">
+      <h2 class="text-xl md:text-2xl font-bold">Billing & Plans</h2>
+      <p class="text-gray-600 text-sm md:text-base">Manage your subscription and usage</p>
     </div>
 
     <!-- Current Plan Overview -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <Card class="lg:col-span-2">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 md:gap-6 w-full">
+      <Card class="lg:col-span-2 w-full">
         <CardHeader>
-          <div class="flex items-center justify-between">
-            <div>
-              <CardTitle>Current Plan</CardTitle>
-              <CardDescription>Your active subscription details</CardDescription>
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 w-full">
+            <div class="w-full md:w-auto">
+              <CardTitle class="text-base md:text-lg">Current Plan</CardTitle>
+              <CardDescription class="text-xs md:text-sm">Your active subscription details</CardDescription>
             </div>
             <Badge :class="getBillingStatusColor(companyBilling.billing_status)">
               {{ companyBilling.billing_status }}
             </Badge>
           </div>
         </CardHeader>
-        <CardContent class="space-y-4">
+        <CardContent class="space-y-4 w-full">
           <div v-if="currentPlan">
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 class="text-lg font-semibold">{{ currentPlan.name }} Plan</h3>
-                <p class="text-2xl font-bold text-[#28A745]">${{ currentPlan.monthly_price }}/month</p>
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 w-full">
+              <div class="w-full md:w-auto">
+                <h3 class="text-base md:text-lg font-semibold">{{ currentPlan.name }} Plan</h3>
+                <p class="text-xl md:text-2xl font-bold text-[#28A745]">${{ currentPlan.monthly_price }}/month</p>
               </div>
-              <Button variant="outline">Change Plan</Button>
+              <Button variant="outline" class="w-full md:w-auto">Change Plan</Button>
             </div>
 
-            <div class="grid grid-cols-3 gap-4 mt-6">
-              <div class="text-center p-4 bg-gray-50 rounded-lg">
-                <p class="text-2xl font-bold">{{ companyBilling.usage.skus_used }}/{{ currentPlan.sku_limit }}</p>
-                <p class="text-sm text-gray-600">SKUs Used</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 mt-4 w-full">
+              <div class="text-center p-3 md:p-4 bg-gray-50 rounded-lg w-full">
+                <p class="text-xl md:text-2xl font-bold">{{ companyBilling.usage.skus_used }}/{{ currentPlan.sku_limit }}</p>
+                <p class="text-xs md:text-sm text-gray-600">SKUs Used</p>
                 <Progress :value="(companyBilling.usage.skus_used / currentPlan.sku_limit) * 100" class="mt-2" />
               </div>
-              <div class="text-center p-4 bg-gray-50 rounded-lg">
-                <p class="text-2xl font-bold">{{ companyBilling.usage.users_used }}/{{ currentPlan.user_limit }}</p>
-                <p class="text-sm text-gray-600">Users</p>
+              <div class="text-center p-3 md:p-4 bg-gray-50 rounded-lg w-full">
+                <p class="text-xl md:text-2xl font-bold">{{ companyBilling.usage.users_used }}/{{ currentPlan.user_limit }}</p>
+                <p class="text-xs md:text-sm text-gray-600">Users</p>
                 <Progress :value="(companyBilling.usage.users_used / currentPlan.user_limit) * 100" class="mt-2" />
               </div>
-              <div class="text-center p-4 bg-gray-50 rounded-lg">
-                <p class="text-2xl font-bold">{{ companyBilling.usage.reports_generated }}/{{ currentPlan.report_limit }}</p>
-                <p class="text-sm text-gray-600">Reports This Month</p>
+              <div class="text-center p-3 md:p-4 bg-gray-50 rounded-lg w-full">
+                <p class="text-xl md:text-2xl font-bold">{{ companyBilling.usage.reports_generated }}/{{ currentPlan.report_limit }}</p>
+                <p class="text-xs md:text-sm text-gray-600">Reports This Month</p>
                 <Progress :value="(companyBilling.usage.reports_generated / currentPlan.report_limit) * 100" class="mt-2" />
               </div>
             </div>
 
-            <div class="mt-6">
-              <h4 class="font-medium mb-2">Plan Features</h4>
-              <div class="grid grid-cols-2 gap-2">
-                <div v-for="(feature, index) in currentPlan.features" :key="index" class="flex items-center space-x-2">
+            <div class="mt-4">
+              <h4 class="font-medium mb-2 text-sm md:text-base">Plan Features</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-1 md:gap-2 w-full">
+                <div v-for="(feature, index) in currentPlan.features" :key="index" class="flex items-center gap-2">
                   <IconCheckCircle class="w-4 h-4 text-green-600" />
-                  <span class="text-sm">{{ feature }}</span>
+                  <span class="text-xs md:text-sm">{{ feature }}</span>
                 </div>
               </div>
             </div>
@@ -60,30 +61,30 @@
         </CardContent>
       </Card>
 
-      <Card>
+      <Card class="w-full">
         <CardHeader>
-          <CardTitle>Billing Summary</CardTitle>
-          <CardDescription>Current billing period</CardDescription>
+          <CardTitle class="text-base md:text-lg">Billing Summary</CardTitle>
+          <CardDescription class="text-xs md:text-sm">Current billing period</CardDescription>
         </CardHeader>
-        <CardContent class="space-y-4">
+        <CardContent class="space-y-4 w-full">
           <div class="space-y-2">
-            <div class="flex justify-between text-sm">
+            <div class="flex justify-between text-xs md:text-sm">
               <span>Billing Period</span>
               <span class="font-medium">
                 {{ formatDate(companyBilling.current_period_start) }} - {{ formatDate(companyBilling.current_period_end) }}
               </span>
             </div>
-            <div class="flex justify-between text-sm">
+            <div class="flex justify-between text-xs md:text-sm">
               <span>Next Payment</span>
               <span class="font-medium">{{ formatDate(companyBilling.current_period_end) }}</span>
             </div>
-            <div class="flex justify-between text-lg font-semibold pt-2 border-t">
+            <div class="flex justify-between text-base md:text-lg font-semibold pt-2 border-t">
               <span>Monthly Total</span>
               <span class="text-[#28A745]">${{ currentPlan?.monthly_price }}</span>
             </div>
           </div>
 
-          <div class="space-y-2 pt-4">
+          <div class="space-y-2 pt-4 w-full">
             <Button class="w-full bg-[#28A745] hover:bg-[#14532D]">
               View Invoices
             </Button>
@@ -99,22 +100,22 @@
     </div>
 
     <!-- Available Plans -->
-    <div>
-      <h3 class="text-xl font-bold mb-4">Available Plans</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card v-for="plan in billingPlans" :key="plan.id" :class="['relative', plan.id === companyBilling.plan_id ? 'ring-2 ring-[#28A745] bg-green-50' : 'hover:shadow-lg transition-shadow']">
+    <div class="mt-2">
+      <h3 class="text-base md:text-xl font-bold mb-2 md:mb-4">Available Plans</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-6 w-full">
+        <Card v-for="plan in billingPlans" :key="plan.id" :class="['relative w-full', plan.id === companyBilling.plan_id ? 'ring-2 ring-[#28A745] bg-green-50' : 'hover:shadow-lg transition-shadow']">
           <div v-if="plan.id === companyBilling.plan_id" class="absolute -top-3 left-1/2 transform -translate-x-1/2">
             <Badge class="bg-[#28A745] text-white">Current Plan</Badge>
           </div>
           <CardHeader class="text-center">
-            <CardTitle class="text-xl">{{ plan.name }}</CardTitle>
-            <div class="text-3xl font-bold text-[#28A745]">
+            <CardTitle class="text-base md:text-xl">{{ plan.name }}</CardTitle>
+            <div class="text-xl md:text-3xl font-bold text-[#28A745]">
               ${{ plan.monthly_price }}
-              <span class="text-base text-gray-600 font-normal">/month</span>
+              <span class="text-xs md:text-base text-gray-600 font-normal">/month</span>
             </div>
           </CardHeader>
-          <CardContent class="space-y-4">
-            <div class="space-y-2 text-sm text-gray-600">
+          <CardContent class="space-y-2 md:space-y-4 w-full">
+            <div class="space-y-1 md:space-y-2 text-xs md:text-sm text-gray-600">
               <div class="flex justify-between">
                 <span>SKU Limit:</span>
                 <span class="font-medium">{{ plan.sku_limit.toLocaleString() }}</span>
@@ -129,10 +130,10 @@
               </div>
             </div>
             <Separator />
-            <div class="space-y-2">
-              <div v-for="(feature, index) in plan.features" :key="index" class="flex items-center space-x-2">
+            <div class="space-y-1 md:space-y-2">
+              <div v-for="(feature, index) in plan.features" :key="index" class="flex items-center gap-2">
                 <IconCheckCircle class="w-4 h-4 text-green-600" />
-                <span class="text-sm">{{ feature }}</span>
+                <span class="text-xs md:text-sm">{{ feature }}</span>
               </div>
             </div>
             <Button
@@ -148,27 +149,26 @@
     </div>
 
     <!-- Usage Alerts -->
-    <!-- Usage Alerts -->
-    <div class="mt-6">
-      <h3 class="text-lg font-bold mb-2">Usage Alerts</h3>
-      <p class="text-gray-600 mb-4">Monitor your plan limits</p>
-      <div v-if="usageAlerts.length > 0" class="flex flex-col gap-4">
+    <div class="mt-4">
+      <h3 class="text-base md:text-lg font-bold mb-2">Usage Alerts</h3>
+      <p class="text-gray-600 mb-2 md:mb-4 text-xs md:text-sm">Monitor your plan limits</p>
+      <div v-if="usageAlerts.length > 0" class="flex flex-col gap-2 md:gap-4 w-full">
         <div
           v-for="(alert, index) in usageAlerts"
           :key="index"
-          class="flex items-start gap-3 p-4 rounded-lg bg-yellow-50"
+          class="flex items-start gap-2 md:gap-3 p-3 md:p-4 rounded-lg bg-yellow-50 w-full"
         >
           <IconAlertTriangle class="w-6 h-6 text-yellow-500 mt-1 flex-shrink-0" />
           <div>
-            <div class="font-semibold text-yellow-900">Usage Warning</div>
-            <div class="text-sm text-yellow-800">{{ alert.message }}</div>
+            <div class="font-semibold text-yellow-900 text-xs md:text-base">Usage Warning</div>
+            <div class="text-xs md:text-sm text-yellow-800">{{ alert.message }}</div>
           </div>
         </div>
       </div>
-      <div v-else class="text-center py-8">
+      <div v-else class="text-center py-8 w-full">
         <div class="flex flex-col items-center">
           <IconCheckCircle class="w-12 h-12 text-green-600 mb-2" />
-          <p class="text-gray-600">All usage levels are within normal limits</p>
+          <p class="text-gray-600 text-xs md:text-sm">All usage levels are within normal limits</p>
         </div>
       </div>
     </div>
