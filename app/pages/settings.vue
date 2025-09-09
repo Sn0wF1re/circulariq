@@ -110,31 +110,33 @@
         </CardHeader>
         <CardContent class="space-y-4">
           <div class="space-y-3">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div>
                 <p class="font-medium">Data Analytics</p>
                 <p class="text-sm text-gray-600">Help improve our platform with usage analytics</p>
               </div>
-              <input type="checkbox" class="rounded" v-model="analytics" />
+              <input type="checkbox" class="rounded self-end md:self-auto" v-model="analytics" />
             </div>
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div>
                 <p class="font-medium">Marketing Communications</p>
                 <p class="text-sm text-gray-600">Receive updates about new features</p>
               </div>
-              <input type="checkbox" class="rounded" v-model="marketing" />
+              <input type="checkbox" class="rounded self-end md:self-auto" v-model="marketing" />
             </div>
-            <Button class="mt-2 bg-[#28A745] hover:bg-[#14532D]" @click="updatePrivacySettings">Save Privacy Settings</Button>
+            <Button class="mt-2 w-full md:w-auto bg-[#28A745] hover:bg-[#14532D]" @click="updatePrivacySettings">Save Privacy Settings</Button>
           </div>
           <Separator />
           <div class="space-y-3">
             <h4 class="font-medium text-red-600">Danger Zone</h4>
-            <Button variant="outline" class="text-red-600 border-red-300 hover:bg-red-50">
-              Export All Data
-            </Button>
-            <Button variant="outline" class="text-red-600 border-red-300 hover:bg-red-50">
-              Delete Account
-            </Button>
+            <div class="flex flex-col gap-2 md:flex-row md:gap-2">
+              <Button variant="outline" class="w-full md:w-auto text-red-600 border-red-300 hover:bg-red-50">
+                Export All Data
+              </Button>
+              <Button variant="outline" class="w-full md:w-auto text-red-600 border-red-300 hover:bg-red-50">
+                Delete Account
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -147,9 +149,9 @@
         <CardContent class="space-y-4">
           <div>
             <p class="font-medium mb-2">API Key</p>
-            <div class="flex items-center space-x-2">
-              <Input :value="apiKey" readonly class="font-mono" />
-              <Button variant="outline" size="sm" @click="copyApiKey">
+            <div class="flex flex-col gap-2 md:flex-row md:items-center md:space-x-2">
+              <Input :value="apiKey" readonly class="font-mono w-full md:w-auto" />
+              <Button variant="outline" size="sm" class="w-full md:w-auto" @click="copyApiKey">
                 Copy
               </Button>
             </div>
@@ -159,13 +161,13 @@
           <div>
             <p class="font-medium mb-3">Connected Apps</p>
             <div class="space-y-2">
-              <div v-for="app in connectedApps" :key="app.name" class="flex items-center justify-between p-3 border rounded-lg">
+              <div v-for="app in connectedApps" :key="app.name" class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between p-3 border rounded-lg">
                 <div>
                   <p class="font-medium">{{ app.name }}</p>
                   <p class="text-sm text-gray-600">{{ app.name === 'Salesforce' ? 'CRM integration' : app.name === 'SAP' ? 'ERP system' : '' }}</p>
                 </div>
-                <Badge v-if="app.status === 'connected'" class="bg-green-100 text-green-800">Connected</Badge>
-                <Button v-else variant="outline" size="sm">
+                <Badge v-if="app.status === 'connected'" class="bg-green-100 text-green-800 w-full md:w-auto mt-2 md:mt-0">Connected</Badge>
+                <Button v-else variant="outline" size="sm" class="w-full md:w-auto mt-2 md:mt-0">
                   Connect
                 </Button>
               </div>
@@ -200,7 +202,7 @@
               <Label for="compliance-status">Compliance Status</Label>
               <Input id="compliance-status" v-model="complianceStatus" placeholder="Compliant" />
             </div>
-            <Button class="bg-[#28A745] hover:bg-[#14532D]" @click="updateCompanySettings">
+            <Button class="w-full md:w-auto bg-[#28A745] hover:bg-[#14532D]" @click="updateCompanySettings">
               Update Company
             </Button>
           </div>
