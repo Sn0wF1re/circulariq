@@ -67,7 +67,7 @@
           <CardDescription>Upload CSV or Excel files with multiple products</CardDescription>
         </CardHeader>
         <CardContent>
-          <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+          <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 md:p-8 text-center">
             <Icon name="upload" class="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <p class="text-lg font-medium text-gray-900 mb-2">
               Drop files here or click to upload
@@ -76,7 +76,7 @@
               Supports CSV, Excel (.xlsx), and JSON formats
             </p>
             <input type="file" class="hidden" ref="fileInput" @change="onFileChange" multiple />
-            <Button class="bg-[#28A745] hover:bg-[#14532D]" @click="triggerFileInput">
+            <Button class="w-full md:w-auto bg-[#28A745] hover:bg-[#14532D]" @click="triggerFileInput">
               Choose Files
             </Button>
           </div>
@@ -91,29 +91,29 @@
         </CardHeader>
         <CardContent>
           <div class="space-y-3">
-            <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+            <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between p-3 bg-green-50 rounded-lg">
               <div>
                 <p class="font-medium">products_q1_2024.csv</p>
                 <p class="text-sm text-gray-600">Uploaded 2 hours ago</p>
               </div>
-              <Badge class="bg-green-100 text-green-800 flex items-center">
+              <Badge class="bg-green-100 text-green-800 flex items-center w-full md:w-auto mt-2 md:mt-0">
                 <Icon name="check-circle" class="w-3 h-3 mr-1" />
                 Processed
               </Badge>
             </div>
-            <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+            <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between p-3 bg-yellow-50 rounded-lg">
               <div>
                 <p class="font-medium">sustainability_metrics.xlsx</p>
                 <p class="text-sm text-gray-600">Uploaded 1 day ago</p>
               </div>
-              <Badge class="bg-yellow-100 text-yellow-800">Processing</Badge>
+              <Badge class="bg-yellow-100 text-yellow-800 w-full md:w-auto mt-2 md:mt-0">Processing</Badge>
             </div>
-            <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+            <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between p-3 bg-red-50 rounded-lg">
               <div>
                 <p class="font-medium">compliance_data.csv</p>
                 <p class="text-sm text-gray-600">Uploaded 3 days ago</p>
               </div>
-              <Badge class="bg-red-100 text-red-800 flex items-center">
+              <Badge class="bg-red-100 text-red-800 flex items-center w-full md:w-auto mt-2 md:mt-0">
                 <Icon name="alert-triangle" class="w-3 h-3 mr-1" />
                 Error
               </Badge>
@@ -131,17 +131,17 @@
       </CardHeader>
       <CardContent>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button variant="outline" class="h-auto p-4 flex flex-col items-center space-y-2">
+          <Button variant="outline" class="w-full h-auto p-4 flex flex-col items-center space-y-2 md:w-auto">
             <Download class="w-6 h-6" />
             <span>Product Template</span>
             <span class="text-xs text-gray-500">CSV format</span>
           </Button>
-          <Button variant="outline" class="h-auto p-4 flex flex-col items-center space-y-2">
+          <Button variant="outline" class="w-full h-auto p-4 flex flex-col items-center space-y-2 md:w-auto">
             <Download class="w-6 h-6" />
             <span>Compliance Template</span>
             <span class="text-xs text-gray-500">Excel format</span>
           </Button>
-          <Button variant="outline" class="h-auto p-4 flex flex-col items-center space-y-2">
+          <Button variant="outline" class="w-full h-auto p-4 flex flex-col items-center space-y-2 md:w-auto">
             <Download class="w-6 h-6" />
             <span>Footprint Template</span>
             <span class="text-xs text-gray-500">JSON format</span>
