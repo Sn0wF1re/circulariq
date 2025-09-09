@@ -1,13 +1,14 @@
 <template>
-  <div class="space-y-6 p-6">
-    <div class="flex justify-between items-center">
-      <div>
-        <h2 class="text-2xl font-bold">Team Management</h2>
-        <p class="text-gray-600">Manage users and their access permissions</p>
+  <div class="flex flex-col gap-4 w-full p-4 md:p-6">
+    <!-- Header & Invite Button -->
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-2 mb-2 w-full">
+      <div class="w-full md:w-auto">
+        <h2 class="text-xl md:text-2xl font-bold">Team Management</h2>
+        <p class="text-gray-600 text-sm md:text-base">Manage users and their access permissions</p>
       </div>
       <Dialog v-if="canManageTeam">
         <DialogTrigger asChild>
-          <Button class="bg-[#28A745] hover:bg-[#14532D]">
+          <Button class="bg-[#28A745] hover:bg-[#14532D] w-full md:w-auto">
             <IconUserPlus class="w-4 h-4 mr-2" />
             Invite User
           </Button>
@@ -50,8 +51,9 @@
       </Dialog>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-      <Card>
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-6 mb-2 w-full">
+      <Card class="w-full">
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle class="text-sm font-medium">Total Users</CardTitle>
           <IconUsers class="h-4 w-4 text-muted-foreground" />
@@ -63,7 +65,7 @@
           </p>
         </CardContent>
       </Card>
-      <Card>
+      <Card class="w-full">
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle class="text-sm font-medium">Admin Users</CardTitle>
           <IconShield class="h-4 w-4 text-muted-foreground" />
@@ -73,7 +75,7 @@
           <p class="text-xs text-muted-foreground">Full system access</p>
         </CardContent>
       </Card>
-      <Card>
+      <Card class="w-full">
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle class="text-sm font-medium">Pending Invites</CardTitle>
           <IconMail class="h-4 w-4 text-muted-foreground" />
@@ -85,25 +87,27 @@
       </Card>
     </div>
 
-    <Card>
+    <!-- Team Table: desktop, cards: mobile -->
+    <Card class="w-full">
       <CardHeader>
-        <div class="flex items-center space-x-4">
-          <div class="relative flex-1">
+        <div class="flex items-center gap-2 md:gap-4 w-full">
+          <div class="relative flex-1 w-full">
             <IconSearch class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               v-model="searchTerm"
               placeholder="Search team members..."
-              class="pl-10"
+              class="pl-10 w-full"
             />
           </div>
-          <Button variant="outline">
+          <Button variant="outline" class="w-full md:w-auto">
             <IconFilter class="w-4 h-4 mr-2" />
             Filter
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
-        <div class="overflow-x-auto">
+      <CardContent class="w-full">
+        <!-- Desktop Table -->
+        <div class="hidden md:block w-full overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -183,6 +187,73 @@
               </tr>
             </tbody>
           </table>
+        </div>
+        <!-- Mobile Cards -->
+        <div class="md:hidden flex flex-col gap-3 w-full">
+          <div v-for="user in filteredUsers" :key="user.id" class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 flex flex-col gap-2 w-full">
+            <div class="flex items-center justify-between w-full">
+              <div>
+                <p class="font-medium">{{ user.name }}</p>
+                <p class="text-xs text-gray-600">{{ user.email }}</p>
+              </div>
+              <Badge :class="getRoleColor(user.role)">{{ user.role }}</Badge>
+            </div>
+            <div class="flex flex-col gap-1 text-xs">
+              <div><span class="font-medium text-gray-600">Status:</span> <Badge :class="getStatusColor(user.status)">{{ user.status }}</Badge></div>
+              <div><span class="font-medium text-gray-600">Last Login:</span> {{ user.last_login }}</div>
+            </div>
+            <div class="flex gap-2 mt-2">
+              <Dialog v-if="canManageTeam">
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <IconMoreVertical class="w-3 h-3" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Manage User: {{ user.name }}</DialogTitle>
+                    <DialogDescription>
+                      Update user role and permissions
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div class="space-y-4">
+                    <div>
+                      <Label :for="`role-${user.id}`">Role</Label>
+                      <Select v-model="user.role">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Admin">Admin</SelectItem>
+                          <SelectItem value="Manager">Manager</SelectItem>
+                          <SelectItem value="Viewer">Viewer</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div class="flex space-x-2">
+                      <Button class="flex-1 bg-[#28A745] hover:bg-[#14532D]" @click="updateTeamMember(user.id, { role: user.role })">
+                        Update Role
+                      </Button>
+                      <Button v-if="user.status === 'Pending'" variant="outline" class="flex-1" @click="acceptInvite(user.id)">
+                        Accept Invite
+                      </Button>
+                      <Button v-if="user.status === 'Pending'" variant="outline" class="flex-1" @click="declineInvite(user.id)">
+                        Decline Invite
+                      </Button>
+                    </div>
+                    <Button
+                      v-if="user.id !== '1'"
+                      variant="outline"
+                      class="w-full text-red-600 border-red-300 hover:bg-red-50"
+                      @click="removeTeamMember(user.id)"
+                    >
+                      Remove User
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
