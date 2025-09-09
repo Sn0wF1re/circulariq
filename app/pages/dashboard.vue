@@ -1,20 +1,20 @@
 <template>
-  <div>
+  <div class="flex flex-col gap-4 w-full">
     <!-- Company Selector -->
-    <Card class="mb-8">
+    <Card class="mb-4 w-full">
       <CardHeader>
-        <CardTitle class="flex items-center gap-2">
+        <CardTitle class="flex items-center gap-2 text-base md:text-lg">
           <IconBuilding2 class="w-5 h-5" />
           Company Overview
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Select v-model="selectedCompany">
-          <SelectTrigger class="w-full max-w-md">
+          <SelectTrigger class="w-full">
             <SelectValue placeholder="Select a company" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem v-for="company in companies" :key="company.id" :value="company.id">
+            <SelectItem v-for="company in companies" :key="company.id" :value="company.id" class="text-sm md:text-base py-2">
               {{ company.name }}
             </SelectItem>
           </SelectContent>
@@ -23,71 +23,73 @@
     </Card>
 
     <!-- KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <Card>
-        <CardHeader class="flex items-center gap-2 mb-2">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
+      <Card class="w-full">
+        <CardHeader class="flex items-center gap-2 mb-1">
           <IconPackage class="w-5 h-5 text-green-700" />
           <span class="text-sm font-medium">Total Plastic Usage</span>
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">{{ kpi.plasticUsage }} kg</div>
+          <div class="text-xl md:text-2xl font-bold">{{ kpi.plasticUsage }} kg</div>
           <div class="text-xs text-green-600 mt-1">-12% from last quarter</div>
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader class="flex items-center gap-2 mb-2">
+      <Card class="w-full">
+        <CardHeader class="flex items-center gap-2 mb-1">
           <IconRecycle class="w-5 h-5 text-green-700" />
           <span class="text-sm font-medium">Recyclability Score</span>
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">{{ kpi.recyclability }}%</div>
+          <div class="text-xl md:text-2xl font-bold">{{ kpi.recyclability }}%</div>
           <div class="text-xs text-green-600 mt-1">+5% from last quarter</div>
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader class="flex items-center gap-2 mb-2">
+      <Card class="w-full">
+        <CardHeader class="flex items-center gap-2 mb-1">
           <IconAlertTriangle class="w-5 h-5 text-yellow-700" />
           <span class="text-sm font-medium">CO2e Emissions</span>
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">{{ kpi.co2e }} tons</div>
+          <div class="text-xl md:text-2xl font-bold">{{ kpi.co2e }} tons</div>
           <div class="text-xs text-green-600 mt-1">-8% from last quarter</div>
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader class="flex items-center gap-2 mb-2">
+      <Card class="w-full">
+        <CardHeader class="flex items-center gap-2 mb-1">
           <IconCheckCircle class="w-5 h-5 text-blue-700" />
           <span class="text-sm font-medium">Compliance Score</span>
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">{{ kpi.compliance }}%</div>
+          <div class="text-xl md:text-2xl font-bold">{{ kpi.compliance }}%</div>
           <div class="text-xs text-gray-600 mt-1">17 of 20 regulations met</div>
         </CardContent>
       </Card>
     </div>
 
-    <!-- Charts Placeholder -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card class="flex flex-col items-center justify-center h-64 p-4">
+    <!-- Charts & Alerts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 w-full">
+      <Card class="flex flex-col items-center justify-center w-full p-2 md:p-4">
         <div class="w-full h-full">
           <template v-if="trendData.length">
-            <canvas ref="trendChart" class="w-full h-56"></canvas>
+            <div class="overflow-x-auto w-full">
+              <canvas ref="trendChart" class="w-full h-48 md:h-56"></canvas>
+            </div>
           </template>
           <template v-else>
-            <span class="text-gray-400">No trend data available</span>
+            <span class="text-gray-400 text-sm">No trend data available</span>
           </template>
         </div>
       </Card>
-      <Card class="p-4">
-        <div class="font-semibold mb-2">Recent Alerts</div>
-        <ul v-if="alerts.length">
-          <li v-for="alert in alerts" :key="alert.id" class="mb-2 flex items-center gap-2">
+      <Card class="p-2 md:p-4 w-full">
+        <div class="font-semibold mb-2 text-base md:text-lg">Recent Alerts</div>
+        <ul v-if="alerts.length" class="flex flex-col gap-2">
+          <li v-for="alert in alerts" :key="alert.id" class="flex items-center gap-2 py-2 px-2 rounded-lg bg-gray-50">
             <IconAlertTriangle class="w-4 h-4 text-yellow-700" />
-            <span>{{ alert.message }}</span>
+            <span class="text-sm">{{ alert.message }}</span>
             <span class="text-xs text-gray-400 ml-auto">{{ new Date(alert.date).toLocaleDateString() }}</span>
           </li>
         </ul>
-        <span v-else class="text-gray-400">No recent alerts</span>
+        <span v-else class="text-gray-400 text-sm">No recent alerts</span>
       </Card>
     </div>
   </div>
