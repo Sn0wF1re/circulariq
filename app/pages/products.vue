@@ -3,14 +3,14 @@
     <div v-if="successMessage" class="fixed top-4 right-4 z-50 bg-green-600 text-white px-4 py-2 rounded shadow-lg animate-fade-in">
       {{ successMessage }}
     </div>
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-2">
       <div>
-        <h2 class="text-2xl font-bold">Product Catalog</h2>
-        <p class="text-gray-600">Manage your product sustainability profiles</p>
+        <h2 class="font-bold text-lg md:text-2xl">Product Catalog</h2>
+        <p class="text-gray-600 text-sm md:text-base">Manage your product sustainability profiles</p>
       </div>
       <Dialog v-model="showAddDialog">
         <DialogTrigger as-child>
-          <button class="bg-[#28A745] hover:bg-[#14532D] text-white px-4 py-2 rounded-lg flex items-center gap-2">
+          <button class="bg-[#28A745] hover:bg-[#14532D] text-white px-4 py-2 rounded-lg flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
             <Plus class="w-4 h-4 mr-2" />
             Add Product
           </button>
