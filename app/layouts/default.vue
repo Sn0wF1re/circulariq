@@ -170,7 +170,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { Bell as IconBell, Settings as IconSettings, LogOut as IconLogOut, BarChart3 as IconBarChart3, Package as IconPackage, FileText as IconFileText, CheckCircle as IconCheckCircle, TrendingUp as IconTrendingUp, Upload as IconUpload, CreditCard as IconCreditCard, Users as IconUsers } from 'lucide-vue-next'
 
 const route = useRoute()
