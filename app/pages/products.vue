@@ -183,60 +183,106 @@
         </div>
       </CardHeader>
       <CardContent>
-        <table class="w-full text-left">
-          <thead>
-            <tr>
-              <th class="font-semibold text-gray-700">Product</th>
-              <th class="font-semibold text-gray-700">SKU</th>
-              <th class="font-semibold text-gray-700">Material</th>
-              <th class="font-semibold text-gray-700">Weight</th>
-              <th class="font-semibold text-gray-700">Recycled %</th>
-              <th class="font-semibold text-gray-700">Recyclability %</th>
-              <th class="font-semibold text-gray-700">Compliance Score</th>
-              <th class="font-semibold text-gray-700">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="product in filteredProducts" :key="product.id" class="hover:bg-gray-50 border-b border-gray-200 last:border-b-0">
-              <td class="font-medium flex items-center gap-2 px-4 py-3">
-                <Package class="w-4 h-4 text-green-700" />
-                {{ product.name }}
-              </td>
-              <td class="px-4 py-3">{{ product.sku_code }}</td>
-              <td class="px-4 py-3">{{ product.material }}</td>
-              <td class="px-4 py-3">{{ product.weight_grams }}g</td>
-              <td class="px-4 py-3">{{ product.recycled_pct }}%</td>
-              <td class="px-4 py-3">{{ product.recyclability_pct }}%</td>
-              <td class="px-4 py-3">
+        <!-- Desktop Table -->
+        <div class="hidden md:block">
+          <table class="w-full text-left">
+            <thead>
+              <tr>
+                <th class="font-semibold text-gray-700">Product</th>
+                <th class="font-semibold text-gray-700">SKU</th>
+                <th class="font-semibold text-gray-700">Material</th>
+                <th class="font-semibold text-gray-700">Weight</th>
+                <th class="font-semibold text-gray-700">Recycled %</th>
+                <th class="font-semibold text-gray-700">Recyclability %</th>
+                <th class="font-semibold text-gray-700">Compliance Score</th>
+                <th class="font-semibold text-gray-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="product in filteredProducts" :key="product.id" class="hover:bg-gray-50 border-b border-gray-200 last:border-b-0">
+                <td class="font-medium flex items-center gap-2 px-4 py-3">
+                  <Package class="w-4 h-4 text-green-700" />
+                  {{ product.name }}
+                </td>
+                <td class="px-4 py-3">{{ product.sku_code }}</td>
+                <td class="px-4 py-3">{{ product.material }}</td>
+                <td class="px-4 py-3">{{ product.weight_grams }}g</td>
+                <td class="px-4 py-3">{{ product.recycled_pct }}%</td>
+                <td class="px-4 py-3">{{ product.recyclability_pct }}%</td>
+                <td class="px-4 py-3">
+                  <span v-if="typeof product.circular_score === 'number'">
+                    {{ product.circular_score.toFixed(1) }}%
+                  </span>
+                  <span v-else>-</span>
+                </td>
+                <td class="px-4 py-3">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger as-child>
+                      <button class="border px-2 py-1 rounded flex items-center gap-1 hover:bg-gray-100">
+                        <span class="sr-only">Actions</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v.01M12 12v.01M12 18v.01" /></svg>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem @click="openDetail(product)">
+                        <Eye class="w-4 h-4 mr-2 text-blue-600" /> View
+                      </DropdownMenuItem>
+                      <DropdownMenuItem @click="openEdit(product)">
+                        <Package class="w-4 h-4 mr-2 text-yellow-600" /> Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem @click="confirmDelete(product)">
+                        <AlertCircle class="w-4 h-4 mr-2 text-red-600" /> Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Mobile Cards -->
+        <div class="md:hidden flex flex-col gap-4">
+          <div v-for="product in filteredProducts" :key="product.id" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <Package class="w-5 h-5 text-green-700" />
+                <span class="font-semibold text-lg">{{ product.name }}</span>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                  <button class="border px-2 py-1 rounded flex items-center gap-1 hover:bg-gray-100">
+                    <span class="sr-only">Actions</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v.01M12 12v.01M12 18v.01" /></svg>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem @click="openDetail(product)">
+                    <Eye class="w-4 h-4 mr-2 text-blue-600" /> View
+                  </DropdownMenuItem>
+                  <DropdownMenuItem @click="openEdit(product)">
+                    <Package class="w-4 h-4 mr-2 text-yellow-600" /> Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem @click="confirmDelete(product)">
+                    <AlertCircle class="w-4 h-4 mr-2 text-red-600" /> Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div><span class="font-medium text-gray-600">SKU:</span> {{ product.sku_code }}</div>
+              <div><span class="font-medium text-gray-600">Material:</span> {{ product.material }}</div>
+              <div><span class="font-medium text-gray-600">Weight:</span> {{ product.weight_grams }}g</div>
+              <div><span class="font-medium text-gray-600">Recycled %:</span> {{ product.recycled_pct }}%</div>
+              <div><span class="font-medium text-gray-600">Recyclability %:</span> {{ product.recyclability_pct }}%</div>
+              <div><span class="font-medium text-gray-600">Compliance:</span>
                 <span v-if="typeof product.circular_score === 'number'">
                   {{ product.circular_score.toFixed(1) }}%
                 </span>
                 <span v-else>-</span>
-              </td>
-              <td class="px-4 py-3">
-                <DropdownMenu>
-                  <DropdownMenuTrigger as-child>
-                    <button class="border px-2 py-1 rounded flex items-center gap-1 hover:bg-gray-100">
-                      <span class="sr-only">Actions</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v.01M12 12v.01M12 18v.01" /></svg>
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem @click="openDetail(product)">
-                      <Eye class="w-4 h-4 mr-2 text-blue-600" /> View
-                    </DropdownMenuItem>
-                    <DropdownMenuItem @click="openEdit(product)">
-                      <Package class="w-4 h-4 mr-2 text-yellow-600" /> Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem @click="confirmDelete(product)">
-                      <AlertCircle class="w-4 h-4 mr-2 text-red-600" /> Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </td>
-            </tr>
-  </tbody>
-        </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </CardContent>
     </Card>
 
