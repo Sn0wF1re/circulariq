@@ -33,11 +33,10 @@
         <!-- Mobile Header -->
         <div class="md:hidden flex flex-col py-2">
           <div class="flex items-center w-full relative" style="min-height:56px;">
-            <!-- Left: Logo, Title, Subtitle stacked vertically -->
+            <!-- Left: Logo and Title only -->
             <div class="flex flex-col items-start gap-0 flex-1">
               <img src="/logo.png" alt="CircularIQ Logo" class="w-7 h-7 mb-1" />
               <span class="font-bold text-base text-gray-900 leading-tight">CircularIQ</span>
-              <span class="text-xs text-gray-500 leading-tight">Sustainability Compliance Platform</span>
             </div>
             <!-- Right: Notification, Hamburger (absolutely right-aligned) -->
             <div class="flex items-center gap-3 absolute right-0 top-1/2 -translate-y-1/2 z-10">
@@ -48,26 +47,23 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                   </button>
                 </SheetTrigger>
-                <SheetContent side="right" class="w-64 flex flex-col items-end">
-                  <SheetHeader class="w-full">
-                    <SheetTitle class="w-full text-right">
-                      <span class="text-xs text-gray-500">Sustainability Compliance Platform</span>
-                    </SheetTitle>
-                  </SheetHeader>
-                  <nav class="flex flex-col gap-4 mt-4 w-full items-end">
-                    <NuxtLink to="/settings" class="flex items-center gap-2 text-gray-700 hover:text-green-700 justify-end w-full" @click="close">
+                <SheetContent side="right" class="w-64 flex flex-col items-stretch px-4 pt-4 pb-6">
+                  <!-- Subtitle aligned with menu items -->
+                  <div class="flex flex-col gap-3 w-full mt-6">
+                    <span class="text-xs text-gray-500 py-2 px-2 rounded-lg">Sustainability Compliance Platform</span>
+                    <NuxtLink to="/settings" class="flex items-center gap-2 text-gray-700 hover:text-green-700 w-full py-2 px-2 rounded-lg" @click="close">
                       <IconSettings class="w-4 h-4" /> Settings
                     </NuxtLink>
-                    <NuxtLink to="/billing" class="flex items-center gap-2 text-gray-700 hover:text-green-700 justify-end w-full" @click="close">
+                    <NuxtLink to="/billing" class="flex items-center gap-2 text-gray-700 hover:text-green-700 w-full py-2 px-2 rounded-lg" @click="close">
                       <IconCreditCard class="w-4 h-4" /> Billing
                     </NuxtLink>
-                    <NuxtLink to="/team" class="flex items-center gap-2 text-gray-700 hover:text-green-700 justify-end w-full" @click="close">
+                    <NuxtLink to="/team" class="flex items-center gap-2 text-gray-700 hover:text-green-700 w-full py-2 px-2 rounded-lg" @click="close">
                       <IconUsers class="w-4 h-4" /> Team
                     </NuxtLink>
-                    <button class="flex items-center gap-2 text-red-600 hover:text-red-800 justify-end w-full" @click="handleLogout; close()">
+                    <button class="flex items-center gap-2 text-red-600 hover:text-red-800 w-full py-2 px-2 rounded-lg" @click="handleLogout; close()">
                       <IconLogOut class="w-4 h-4" /> Logout
                     </button>
-                  </nav>
+                  </div>
                 </SheetContent>
               </Sheet>
             </div>
