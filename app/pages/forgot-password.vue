@@ -1,17 +1,17 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-[#EFFBF0]">
-    <Card class="w-full max-w-lg min-w-[350px] p-8 shadow-lg bg-white rounded-xl">
+  <div class="min-h-screen flex items-center justify-center bg-[#EFFBF0] px-2">
+    <Card class="w-full max-w-xs sm:max-w-sm md:max-w-lg min-w-[0] p-4 md:p-8 shadow-lg bg-white rounded-xl">
       <CardHeader class="mb-6 text-center">
         <IconKey class="mx-auto w-10 h-10 text-[#28A745] mb-2" />
         <CardTitle class="text-2xl font-bold">Reset Password</CardTitle>
         <CardDescription class="text-gray-600">We'll send you a link to reset your password</CardDescription>
       </CardHeader>
-      <form @submit.prevent="onReset" class="space-y-5">
+  <form @submit.prevent="onReset" class="flex flex-col gap-2 md:gap-5">
         <div class="flex flex-col gap-1">
           <Label for="email">Email</Label>
           <Input id="email" v-model="email" type="email" placeholder="you@email.com" required autofocus />
         </div>
-        <Button type="submit" :disabled="loading" class="w-full bg-[#28A745] hover:bg-[#14532D] text-white font-semibold py-2 rounded">
+  <Button type="submit" :disabled="loading" class="w-full h-12 bg-[#28A745] hover:bg-[#14532D] text-white font-semibold text-base rounded">
           <span v-if="loading"><IconLoader class="animate-spin w-4 h-4 inline mr-2" /></span>
           Send Reset Link
         </Button>

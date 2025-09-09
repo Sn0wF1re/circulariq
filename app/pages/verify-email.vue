@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-[#EFFBF0]">
-    <Card class="w-full max-w-lg min-w-[350px] p-8 shadow-lg bg-white rounded-xl">
+  <div class="min-h-screen flex items-center justify-center bg-[#EFFBF0] px-2">
+    <Card class="w-full max-w-xs sm:max-w-sm md:max-w-lg min-w-[0] p-4 md:p-8 shadow-lg bg-white rounded-xl">
       <CardHeader class="mb-6 text-center">
         <IconMailCheck class="mx-auto w-10 h-10 text-[#28A745] mb-2" />
         <CardTitle class="text-2xl font-bold">Verify Your Email</CardTitle>
@@ -10,7 +10,7 @@
         Once verified, please log in to continue onboarding.
       </div>
       <NuxtLink to="/login" class="w-full block mt-4">
-        <Button type="submit" class="w-full bg-[#28A745] hover:bg-[#14532D]">Go to Login</Button>
+        <Button type="submit" class="w-full h-12 bg-[#28A745] hover:bg-[#14532D] text-base">Go to Login</Button>
       </NuxtLink>
     </Card>
   </div>
