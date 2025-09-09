@@ -3,14 +3,14 @@
     <div v-if="successMessage" class="fixed top-4 right-4 z-50 bg-green-600 text-white px-4 py-2 rounded shadow-lg animate-fade-in">
       {{ successMessage }}
     </div>
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-2">
-      <div>
-        <h2 class="font-bold text-lg md:text-2xl">Product Catalog</h2>
-        <p class="text-gray-600 text-sm md:text-base">Manage your product sustainability profiles</p>
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-2 w-full">
+      <div class="w-full md:w-auto">
+        <h2 class="font-bold text-lg md:text-2xl leading-tight">Product Catalog</h2>
+        <p class="text-gray-600 text-sm md:text-base leading-tight">Manage your product sustainability profiles</p>
       </div>
       <Dialog v-model="showAddDialog">
         <DialogTrigger as-child>
-          <button class="bg-[#28A745] hover:bg-[#14532D] text-white px-4 py-2 rounded-lg flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
+          <button class="bg-[#28A745] hover:bg-[#14532D] text-white px-4 py-2 rounded-lg flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0 text-base">
             <Plus class="w-4 h-4 mr-2" />
             Add Product
           </button>
@@ -168,34 +168,34 @@
         </DialogContent>
       </Dialog>
     </div>
-    <Card>
-      <CardHeader>
-        <div class="flex items-center space-x-4">
-          <div class="relative flex-1">
+    <Card class="w-full max-w-full">
+      <CardHeader class="w-full max-w-full">
+        <div class="flex items-center space-x-4 w-full max-w-full">
+          <div class="relative flex-1 w-full max-w-full">
             <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               v-model="searchQuery"
               placeholder="Search products..."
-              class="pl-10 border rounded-lg py-2 w-full"
+              class="pl-10 border rounded-lg py-2 w-full max-w-full text-sm"
               type="text"
             />
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent class="w-full max-w-full">
         <!-- Desktop Table -->
-        <div class="hidden md:block">
+        <div class="hidden md:block w-full max-w-full overflow-x-auto">
           <table class="w-full text-left">
             <thead>
               <tr>
-                <th class="font-semibold text-gray-700">Product</th>
-                <th class="font-semibold text-gray-700">SKU</th>
-                <th class="font-semibold text-gray-700">Material</th>
-                <th class="font-semibold text-gray-700">Weight</th>
-                <th class="font-semibold text-gray-700">Recycled %</th>
-                <th class="font-semibold text-gray-700">Recyclability %</th>
-                <th class="font-semibold text-gray-700">Compliance Score</th>
-                <th class="font-semibold text-gray-700">Actions</th>
+                <th class="font-semibold text-gray-700 whitespace-nowrap">Product</th>
+                <th class="font-semibold text-gray-700 whitespace-nowrap">SKU</th>
+                <th class="font-semibold text-gray-700 whitespace-nowrap">Material</th>
+                <th class="font-semibold text-gray-700 whitespace-nowrap">Weight</th>
+                <th class="font-semibold text-gray-700 whitespace-nowrap">Recycled %</th>
+                <th class="font-semibold text-gray-700 whitespace-nowrap">Recyclability %</th>
+                <th class="font-semibold text-gray-700 whitespace-nowrap">Compliance Score</th>
+                <th class="font-semibold text-gray-700 whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -241,12 +241,12 @@
           </table>
         </div>
         <!-- Mobile Cards -->
-        <div class="md:hidden flex flex-col gap-4">
-          <div v-for="product in filteredProducts" :key="product.id" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col gap-2">
-            <div class="flex items-center justify-between">
+        <div class="md:hidden flex flex-col gap-4 w-full max-w-full">
+          <div v-for="product in filteredProducts" :key="product.id" class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 flex flex-col gap-2 w-full max-w-full">
+            <div class="flex items-center justify-between w-full max-w-full">
               <div class="flex items-center gap-2">
                 <Package class="w-5 h-5 text-green-700" />
-                <span class="font-semibold text-lg">{{ product.name }}</span>
+                <span class="font-semibold text-base">{{ product.name }}</span>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger as-child>
@@ -268,7 +268,7 @@
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <div class="grid grid-cols-2 gap-2 text-sm">
+            <div class="grid grid-cols-2 gap-2 text-xs w-full max-w-full">
               <div><span class="font-medium text-gray-600">SKU:</span> {{ product.sku_code }}</div>
               <div><span class="font-medium text-gray-600">Material:</span> {{ product.material }}</div>
               <div><span class="font-medium text-gray-600">Weight:</span> {{ product.weight_grams }}g</div>
