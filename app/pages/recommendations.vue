@@ -5,7 +5,7 @@
         <h2 class="text-2xl font-bold">AI-Powered Recommendations</h2>
         <p class="text-gray-600">Intelligent suggestions to improve your sustainability profile</p>
       </div>
-      <div class="mb-4 w-full max-w-xs flex gap-4">
+  <div class="mb-4 w-full flex flex-col gap-2 md:flex-row md:gap-4 md:max-w-xs">
         <Select v-model="selectedProduct">
           <SelectTrigger>
             <SelectValue placeholder="Filter by product" />
@@ -33,7 +33,7 @@
       <div class="space-y-4">
         <Card v-for="rec in filteredRecommendations" :key="rec.id" :class="implementedIds.includes(rec.id) ? 'opacity-60' : ''">
           <CardHeader>
-            <div class="flex items-start justify-between">
+            <div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
               <div>
                 <div class="font-semibold text-lg flex items-center gap-2">
                   {{ rec.title }}
@@ -71,19 +71,19 @@
                 :style="{ width: Math.round(rec.ai_confidence * 100) + '%' }"
               />
             </div>
-            <div class="flex gap-2 mt-4">
+            <div class="flex flex-col gap-2 md:flex-row md:gap-2 mt-4">
               <button
                 v-if="!implementedIds.includes(rec.id)"
                 @click="markAsImplemented(rec.id)"
                 :disabled="loadingIds.includes(rec.id)"
-                class="px-3 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700 flex items-center gap-2"
+                class="w-full md:w-auto px-3 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700 flex items-center gap-2"
               >
                 <Loader2 v-if="loadingIds.includes(rec.id)" class="animate-spin w-4 h-4" />
                 <span>Mark as Implemented</span>
               </button>
               <Dialog>
                 <DialogTrigger as-child>
-                  <button class="px-3 py-1 bg-primary text-white rounded text-xs font-semibold hover:bg-primary/90">View Details</button>
+                  <button class="w-full md:w-auto px-3 py-1 bg-primary text-white rounded text-xs font-semibold hover:bg-primary/90">View Details</button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
@@ -97,10 +97,12 @@
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <DialogClose as-child>
-                      <button class="px-3 py-1 bg-gray-200 rounded text-xs font-semibold hover:bg-gray-300">Close</button>
-                    </DialogClose>
-                    <button @click="downloadRecommendation(rec)" class="px-3 py-1 bg-secondary text-xs font-semibold rounded hover:bg-secondary/90 mr-2">Download Recommendation</button>
+                    <div class="flex flex-col gap-2 md:flex-row md:gap-2 w-full">
+                      <DialogClose as-child>
+                        <button class="w-full md:w-auto px-3 py-1 bg-gray-200 rounded text-xs font-semibold hover:bg-gray-300">Close</button>
+                      </DialogClose>
+                      <button @click="downloadRecommendation(rec)" class="w-full md:w-auto px-3 py-1 bg-secondary text-xs font-semibold rounded hover:bg-secondary/90">Download Recommendation</button>
+                    </div>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
