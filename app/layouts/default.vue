@@ -32,15 +32,15 @@
         </div>
         <!-- Mobile Header -->
         <div class="md:hidden flex flex-col py-2">
-          <div class="flex items-center w-full justify-between">
+          <div class="flex items-center w-full relative" style="min-height:56px;">
             <!-- Left: Logo, Title, Subtitle stacked vertically -->
-            <div class="flex flex-col items-start gap-0">
+            <div class="flex flex-col items-start gap-0 flex-1">
               <img src="/logo.png" alt="CircularIQ Logo" class="w-7 h-7 mb-1" />
               <span class="font-bold text-base text-gray-900 leading-tight">CircularIQ</span>
               <span class="text-xs text-gray-500 leading-tight">Sustainability Compliance Platform</span>
             </div>
-            <!-- Right: Notification, Hamburger -->
-            <div class="flex items-center gap-3">
+            <!-- Right: Notification, Hamburger (absolutely right-aligned) -->
+            <div class="flex items-center gap-3 absolute right-0 top-1/2 -translate-y-1/2 z-10">
               <NotificationDropdown />
               <Sheet v-slot="{ open, close }">
                 <SheetTrigger as-child>
