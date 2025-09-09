@@ -82,7 +82,7 @@
         <div class="font-semibold mb-2">Recent Alerts</div>
         <ul v-if="alerts.length">
           <li v-for="alert in alerts" :key="alert.id" class="mb-2 flex items-center gap-2">
-            <AlertTriangle class="w-4 h-4 text-yellow-700" />
+            <IconAlertTriangle class="w-4 h-4 text-yellow-700" />
             <span>{{ alert.message }}</span>
             <span class="text-xs text-gray-400 ml-auto">{{ new Date(alert.date).toLocaleDateString() }}</span>
           </li>
