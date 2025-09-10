@@ -6,7 +6,7 @@
         <h2 class="text-xl md:text-2xl font-bold">Footprint Reports</h2>
         <p class="text-gray-600 text-sm md:text-base">Generate and manage sustainability reports</p>
       </div>
-      <button class="bg-[#28A745] hover:bg-[#14532D] text-white px-4 py-2 rounded-lg flex items-center gap-2 w-full md:w-auto">
+  <button class="bg-[#28A745] hover:bg-[#14532D] text-white px-4 py-2 rounded-lg flex items-center gap-2 w-full md:w-auto justify-center mx-auto">
         <Download class="w-4 h-4 mr-2" />
         Generate Report
       </button>
@@ -65,7 +65,7 @@
         </CardHeader>
         <CardContent>
           <div class="flex flex-col gap-2 md:gap-4 w-full">
-            <button class="border px-4 py-3 rounded-lg w-full flex items-center gap-3 bg-white hover:bg-gray-50 transition text-sm md:text-base">
+            <button class="border px-4 py-3 rounded-lg w-full flex items-center gap-3 bg-white hover:bg-gray-50 transition text-sm md:text-base justify-center mx-auto">
               <FileText class="w-5 h-5 mr-2 text-gray-600" />
               <span class="font-medium">EU Compliance Report</span>
             </button>

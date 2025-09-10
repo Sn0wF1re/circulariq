@@ -53,7 +53,7 @@
               <Input id="individual-recyclability" v-model="form.recyclability_pct" type="number" min="0" max="100" placeholder="Enter percentage" />
             </div>
           </div>
-          <Button class="w-full bg-[#28A745] hover:bg-[#14532D]" @click="addProduct">
+          <Button class="w-full bg-[#28A745] hover:bg-[#14532D] justify-center mx-auto" @click="addProduct">
             <Icon name="plus" class="w-4 h-4 mr-2" />
             Add Product
           </Button>
@@ -76,7 +76,7 @@
               Supports CSV, Excel (.xlsx), and JSON formats
             </p>
             <input type="file" class="hidden" ref="fileInput" @change="onFileChange" multiple />
-            <Button class="w-full md:w-auto bg-[#28A745] hover:bg-[#14532D]" @click="triggerFileInput">
+            <Button class="w-full md:w-auto bg-[#28A745] hover:bg-[#14532D] justify-center mx-auto" @click="triggerFileInput">
               Choose Files
             </Button>
           </div>
@@ -131,17 +131,17 @@
       </CardHeader>
       <CardContent>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button variant="outline" class="w-full h-auto p-4 flex flex-col items-center space-y-2 md:w-auto">
+          <Button variant="outline" class="w-full h-auto p-4 flex flex-col items-center space-y-2 md:w-auto justify-center mx-auto">
             <Download class="w-6 h-6" />
             <span>Product Template</span>
             <span class="text-xs text-gray-500">CSV format</span>
           </Button>
-          <Button variant="outline" class="w-full h-auto p-4 flex flex-col items-center space-y-2 md:w-auto">
+          <Button variant="outline" class="w-full h-auto p-4 flex flex-col items-center space-y-2 md:w-auto justify-center mx-auto">
             <Download class="w-6 h-6" />
             <span>Compliance Template</span>
             <span class="text-xs text-gray-500">Excel format</span>
           </Button>
-          <Button variant="outline" class="w-full h-auto p-4 flex flex-col items-center space-y-2 md:w-auto">
+          <Button variant="outline" class="w-full h-auto p-4 flex flex-col items-center space-y-2 md:w-auto justify-center mx-auto">
             <Download class="w-6 h-6" />
             <span>Footprint Template</span>
             <span class="text-xs text-gray-500">JSON format</span>

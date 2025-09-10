@@ -10,7 +10,7 @@
       </div>
       <Dialog v-model="showAddDialog">
         <DialogTrigger as-child>
-          <button class="bg-[#28A745] hover:bg-[#14532D] text-white px-4 py-2 rounded-lg flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0 text-base">
+          <button class="bg-[#28A745] hover:bg-[#14532D] text-white px-4 py-2 rounded-lg flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0 text-base justify-center mx-auto">
             <Plus class="w-4 h-4 mr-2" />
             Add Product
           </button>
@@ -157,7 +157,7 @@
               </div>
               <Button
                 type="submit"
-                class="w-full bg-[#28A745] hover:bg-[#14532D] text-white py-2 rounded-lg flex items-center justify-center gap-2"
+                class="w-full bg-[#28A745] hover:bg-[#14532D] text-white py-2 rounded-lg flex items-center justify-center gap-2 mx-auto"
                 :disabled="!isFormValid"
               >
                 <Plus class="w-4 h-4 mr-2" />
