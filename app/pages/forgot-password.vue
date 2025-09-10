@@ -6,12 +6,12 @@
         <CardTitle class="text-2xl font-bold">Reset Password</CardTitle>
         <CardDescription class="text-gray-600">We'll send you a link to reset your password</CardDescription>
       </CardHeader>
-  <form @submit.prevent="onReset" class="flex flex-col gap-2 md:gap-5">
+      <form @submit.prevent="onReset" class="flex flex-col gap-2 md:gap-5">
         <div class="flex flex-col gap-1">
           <Label for="email">Email</Label>
           <Input id="email" v-model="email" type="email" placeholder="you@email.com" required autofocus />
         </div>
-  <Button type="submit" :disabled="loading" class="w-full h-12 bg-[#28A745] hover:bg-[#14532D] text-white font-semibold text-base rounded">
+        <Button type="submit" :disabled="loading" class="w-full h-12 bg-[#28A745] hover:bg-[#14532D] text-white font-semibold text-base rounded">
           <span v-if="loading"><IconLoader class="animate-spin w-4 h-4 inline mr-2" /></span>
           Send Reset Link
         </Button>
