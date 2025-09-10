@@ -99,10 +99,6 @@
               class="pl-10 w-full"
             />
           </div>
-          <Button variant="outline" class="w-full md:w-auto">
-            <IconFilter class="w-4 h-4 mr-2" />
-            Filter
-          </Button>
         </div>
       </CardHeader>
       <CardContent class="w-full">
