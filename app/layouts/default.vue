@@ -26,7 +26,7 @@
               <IconUsers class="w-4 h-4" /> Team
             </NuxtLink>
             <button class="border rounded px-3 py-1 flex items-center gap-2 text-red-600 border-red-300 hover:bg-red-50 font-medium" @click="handleLogout">
-              <IconLogOut class="w-4 h-4" /> Logout
+              <IconLogOut class="w-4 h-4" /> Log Out
             </button>
           </div>
         </div>
@@ -61,7 +61,7 @@
                       <IconUsers class="w-4 h-4" /> Team
                     </NuxtLink>
                     <button class="flex items-center gap-2 text-red-600 hover:text-red-800 w-full py-2 px-2 rounded-lg" @click="handleLogout; close()">
-                      <IconLogOut class="w-4 h-4" /> Logout
+                      <IconLogOut class="w-4 h-4" /> Log Out
                     </button>
                   </div>
                 </SheetContent>
